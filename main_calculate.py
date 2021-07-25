@@ -16,7 +16,7 @@ from show_rst import ShowRst
 index_id = '0000300'
 date_start = '20200101'
 date_end = '20201231'
-weekday = 3
+weekday = 4
 m_day = 20
 tu = GetTuShareData()
 tu_data = tu.get_index_daily('399300.SZ', date_start, date_end)

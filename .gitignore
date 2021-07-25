@@ -1,0 +1,10 @@
+/data/
+*.csv
+*.pyc
+*.iml
+*.xml
+/.idea/
+/__pycache__/
+
+
+
