@@ -6,7 +6,7 @@ import tushare as ts
 from datetime import datetime, timedelta
 
 
-class GetMarketData:
+class GetCsvData:
     def __init__(self):
         pass
 
@@ -78,6 +78,6 @@ if __name__ == '__main__':
     index_id = '0000300'
     date_start = '20200101'
     date_end = '20211031'
-    gd = GetMarketData()
+    gd = GetCsvData()
     raw_data_t = gd.get_k_data_by_163(index_id, date_start, date_end)
     cal_data_t = gd.gen_cal_data(raw_data_t)

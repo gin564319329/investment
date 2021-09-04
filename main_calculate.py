@@ -1,8 +1,8 @@
-from get_market_data import GetMarketData, GetTuShareData
+from get_market_data import GetCsvData, GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 
-# gd = GetMarketData()
+# gd = GetCsvData()
 # raw_data = gd.get_k_data_by_163(index_id, date_start, date_end)
 # cal_data = gd.gen_cal_data(raw_data)
 # fi = CalFixedInvest(cal_data, money_amount=500)
