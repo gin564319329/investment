@@ -5,9 +5,11 @@ from show_rst import ShowRst
 
 date_start = '20200101'
 date_end = '20201231'
+ts_code = '399300.SZ'
+# ts_code = '399905.SZ'
 weekday = 4
 m_day = 20
-tu_data = GetTuShareData().get_index_daily('399300.SZ', date_start, date_end)
+tu_data = GetTuShareData().get_index_daily(ts_code, date_start, date_end)
 cal_data_tu = GetTuShareData().gen_cal_data(tu_data)
 
 fit = CalFixedInvest(cal_data_tu, money_amount=500)
