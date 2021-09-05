@@ -32,7 +32,7 @@ class ShowRst:
         plt.legend(labels=['指数', '定投'], prop={'size': 11}, loc='best')
         plt.title('定投净值曲线')
         plt.grid(axis='y')
-        # plt.show()
+        plt.show()
 
     @staticmethod
     def show_average_principal(ax1, pri_average):

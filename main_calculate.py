@@ -2,25 +2,13 @@ from get_market_data import GetCsvData, GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 
-# gd = GetCsvData()
-# raw_data = gd.get_k_data_by_163(index_id, date_start, date_end)
-# cal_data = gd.gen_cal_data(raw_data)
-# fi = CalFixedInvest(cal_data, money_amount=500)
-# df_invest_data = fi.fixed_invest_by_week(weekday=3)
-# df_invest_data_m = fi.fixed_invest_by_month(month_day=20)
-# principal, final_amount, profit, buy_num = fi.cal_yield(df_invest_data)
-# principal_m, final_amount_m, profit_m, buy_num_m = fi.cal_yield(df_invest_data_m)
-# print('principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal, final_amount, profit, buy_num))
-# print('principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_m, final_amount_m, profit_m, buy_num_m))
 
-index_id = '0000300'
 date_start = '20200101'
 date_end = '20201231'
 weekday = 4
 m_day = 20
-tu = GetTuShareData()
-tu_data = tu.get_index_daily('399300.SZ', date_start, date_end)
-cal_data_tu = tu.gen_cal_data(tu_data)
+tu_data = GetTuShareData().get_index_daily('399300.SZ', date_start, date_end)
+cal_data_tu = GetTuShareData().gen_cal_data(tu_data)
 
 fit = CalFixedInvest(cal_data_tu, money_amount=500)
 fit_m = CalFixedInvest(cal_data_tu, money_amount=2000)
