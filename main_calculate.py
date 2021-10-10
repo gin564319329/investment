@@ -1,4 +1,4 @@
-from get_market_data import GetCsvData, GetTuShareData
+from get_market_data import GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 
@@ -6,6 +6,7 @@ from show_rst import ShowRst
 date_start = '20200101'
 date_end = '20201231'
 ts_code = '399300.SZ'
+# ts_code = '000300.SH'
 # ts_code = '399905.SZ'
 weekday = 4
 m_day = 20
