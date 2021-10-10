@@ -48,10 +48,13 @@ class GetTuShareData:
         self.pro = ts.pro_api()
 
     def get_index_daily(self, ts_code, start_date, end_date):
-        df000300 = self.pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        df000300_sort = df000300.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
-        # df000300_sort.to_csv('D:\\2 Project codes\\investment\\data\\300_pro.csv')
-        return df000300_sort
+        df = self.pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
+        # df_sort.to_csv('D:\\2 Project codes\\investment\\data\\300_pro.csv')
+        return df_sort
+
+    def get_index_basic(self, ts_code, name, market):
+        df = self.pro.index_basic(market=market)
 
     @staticmethod
     def gen_cal_data(raw_data):
