@@ -13,11 +13,9 @@ import re
 import matplotlib
 import tushare as ts
 
-ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
-pro = ts.pro_api()
-name_search = ''
-df_sh = pro.index_basic(name='', market='SSE')
-df_sz = pro.index_basic(name='', market='SZSE')
+get_data = GetTuShareData()
+df_sh = get_data.get_index_basic('', '', market='SSE')
+df_sz = get_data.get_index_basic('', '', market='SZSE')
 search_dict = {'ts_code': [], 'name': []}
 name_search_list = ['沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
 
@@ -40,10 +38,10 @@ for index, s in df_sz.iterrows():
 #         print('{} code: {}'.format(s['name'], s['ts_code']))
 
 
-ts_code = '000300.SH'
-start_date = '20051231'
-end_date = '20061231'
-df = pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+# ts_code = '000300.SH'
+# start_date = '20051231'
+# end_date = '20061231'
+# df = pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
 
 # def request_url(url, params=None, proxies=None):
 #     rsp = requests.get(url, params=params, proxies=proxies)

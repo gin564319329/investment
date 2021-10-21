@@ -39,6 +39,10 @@ class CalYieldRate:
         rate_annual = pow((rate_s + 1), num_a_year) - 1
         return rate_s, rate_annual
 
+    @staticmethod
+    def cal_change_ratio(initial_value, final_value):
+        return (final_value - initial_value) / initial_value
+
 
 class CalFixedInvest:
 
