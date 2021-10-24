@@ -54,7 +54,7 @@ class GetTuShareData:
         return df_sort
 
     def get_index_basic(self, ts_code, name, market):
-        df = self.pro.index_basic(market=market)
+        return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
     @staticmethod
     def gen_cal_data(raw_data):
