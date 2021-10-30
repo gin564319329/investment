@@ -56,6 +56,18 @@ class GetTuShareData:
     def get_index_basic(self, ts_code, name, market):
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
+    def get_fund_daily(self, ts_code, start_date, end_date):
+        df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        # df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
+        return df
+
+    def get_fund_manager(self, ts_code):
+        return self.pro.fund_manager(ts_code=ts_code)
+
+    def get_fund_basic(self, market='E', status=''):
+        """E场内 O场外（默认E）存续状态 D 摘牌 I 发行 L 上市中"""
+        return self.pro.fund_basic(market=market, status=status)
+
     @staticmethod
     def gen_cal_data(raw_data):
         cal_data = pd.DataFrame()

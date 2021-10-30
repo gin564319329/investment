@@ -13,26 +13,29 @@ import re
 import matplotlib
 import tushare as ts
 
-get_data = GetTuShareData()
-df_sh = get_data.get_index_basic('', '', market='SSE')
-df_sz = get_data.get_index_basic('', '', market='SZSE')
-search_dict = {'ts_code': [], 'name': []}
-name_search_list = ['沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
+pd.set_option('display.max_columns', None)
 
-for index, s in df_sh.iterrows():
-    if s['name'] in name_search_list:
-        name_search_list.remove(s['name'])
-        print('{}\t代码:\t {}'.format(s['name'], s['ts_code']))
-        search_dict['ts_code'].append(s['ts_code'])
-        search_dict['name'].append(s['name'])
+ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
+pro = ts.pro_api()
+date_start = '20151231'
+date_end = '20171231'
+ts_code = '162605.SZ'
+# ts_code = '000300.SH'
+# ts_code = '399905.SZ'
+weekday = 4
+m_day = 20
+tu_data = GetTuShareData().get_fund_daily(ts_code, date_start, date_end)
+df = pro.fund_nav(ts_code=ts_code)
+tu_ma = GetTuShareData().get_fund_manager(ts_code)
+print(tu_ma)
+fu_basic = GetTuShareData().get_fund_basic(market='O', status='L')
+fu_e = GetTuShareData().get_fund_basic(market='E', status='L')
+print(fu_basic)
 
-for index, s in df_sz.iterrows():
-    if s['name'] in name_search_list:
-        name_search_list.remove(s['name'])
-        print('{}\t代码:\t {}'.format(s['name'], s['ts_code']))
-        search_dict['ts_code'].append(s['ts_code'])
-        search_dict['name'].append(s['name'])
+js = fu_basic[fu_basic['management']=='景顺长城基金']
+jse = fu_e[fu_e['management']=='景顺长城基金']
 
+'景顺长城基金' in fu_basic['management'].values
 # for index, s in df_sh.iterrows():
 #     if '中证' in s['name']:
 #         print('{} code: {}'.format(s['name'], s['ts_code']))
