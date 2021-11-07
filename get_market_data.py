@@ -57,16 +57,26 @@ class GetTuShareData:
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
     def get_fund_daily(self, ts_code, start_date, end_date):
+        """获取场内基金日线行情，类似股票日行情"""
         df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
         # df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
+        return df
+
+    def get_fund_nav(self, ts_code, start_date, end_date):
+        """获取公募基金净值数据 含场内与场外"""
+        df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
         return df
 
     def get_fund_manager(self, ts_code):
         return self.pro.fund_manager(ts_code=ts_code)
 
     def get_fund_basic(self, market='E', status=''):
-        """E场内 O场外（默认E）存续状态 D 摘牌 I 发行 L 上市中"""
+        """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         return self.pro.fund_basic(market=market, status=status)
+
+    def get_fund_portfolio(self, ts_code):
+        """获取公募基金持仓数据，季度更新"""
+        return self.pro.fund_portfolio(ts_code)
 
     @staticmethod
     def gen_cal_data(raw_data):
