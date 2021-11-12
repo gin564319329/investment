@@ -74,9 +74,9 @@ class GetTuShareData:
         """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         return self.pro.fund_basic(market=market, status=status)
 
-    def get_fund_portfolio(self, ts_code):
+    def get_fund_portfolio(self, ts_code, end_date):
         """获取公募基金持仓数据，季度更新"""
-        return self.pro.fund_portfolio(ts_code)
+        return self.pro.fund_portfolio(ts_code=ts_code, end_date=end_date)
 
     @staticmethod
     def gen_cal_data(raw_data):
