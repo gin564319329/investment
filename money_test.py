@@ -30,32 +30,40 @@ ts_code = '162605.SZ'
 weekday = 4
 m_day = 20
 get_data = GetTuShareData()
-tu_data = get_data.get_fund_daily(ts_code, date_start, date_end)
-tu_basic = get_data.get_fund_basic(market='E', status='L')
 
-tu_basic.to_csv('D:\\project_codes\\temp\\fund_open_delist.csv', index=False, encoding='utf_8_sig')
+# ss = get_data.get_stock_name('167508.SZ')
+# print(ss[0])
 
-tu_data.to_csv('D:\\project_codes\\temp\\tushare.csv', index=False)
-tu_data.to_excel('D:\\project_codes\\temp\\tuexc.xls', index=False)
-df = pro.fund_nav(ts_code=ts_code)
+portfolio = get_data.get_fund_portfolio('167508.SZ', end_date='20200630')
+folio = get_data.get_stock_name_batch(portfolio['symbol'].tolist())
+fio = pd.concat([portfolio, folio['name']], axis=1)
 
-df1 = get_data.get_fund_nav(ts_code, date_start, date_end)
-df = pro.fund_portfolio(ts_code='001753.OF', end_date='')
-portfolio = get_data.get_fund_portfolio('167508.SZ', '')
-
-tu_ma = GetTuShareData().get_fund_manager(ts_code)
-print(tu_ma)
-fu_basic = GetTuShareData().get_fund_basic(market='O', status='L')
-fu_e = GetTuShareData().get_fund_basic(market='E', status='L')
-print(fu_basic)
-
-js = fu_basic[fu_basic['management']=='景顺长城基金']
-jse = fu_e[fu_e['management']=='景顺长城基金']
-
-
-df= pd.DataFrame.from_dict({'sd': 34})
-df.to_excel()
-
-
-data = pro.stock_basic(ts_code='002120.SZ')
+# tu_data = get_data.get_fund_daily(ts_code, date_start, date_end)
+# tu_basic = get_data.get_fund_basic(market='E', status='L')
+#
+# tu_basic.to_csv('D:\\project_codes\\temp\\fund_open_delist.csv', index=False, encoding='utf_8_sig')
+#
+# tu_data.to_csv('D:\\project_codes\\temp\\tushare.csv', index=False)
+# tu_data.to_excel('D:\\project_codes\\temp\\tuexc.xls', index=False)
+# df = pro.fund_nav(ts_code=ts_code)
+#
+# df1 = get_data.get_fund_nav(ts_code, date_start, date_end)
+# df = pro.fund_portfolio(ts_code='001753.OF', end_date='')
+# portfolio = get_data.get_fund_portfolio('167508.SZ', '')
+#
+# tu_ma = GetTuShareData().get_fund_manager(ts_code)
+# print(tu_ma)
+# fu_basic = GetTuShareData().get_fund_basic(market='O', status='L')
+# fu_e = GetTuShareData().get_fund_basic(market='E', status='L')
+# print(fu_basic)
+#
+# js = fu_basic[fu_basic['management']=='景顺长城基金']
+# jse = fu_e[fu_e['management']=='景顺长城基金']
+#
+#
+# df= pd.DataFrame.from_dict({'sd': 34})
+# df.to_excel()
+#
+#
+data = pro.stock_basic(ts_code='002120.SZ, 000001.SZ,000002.SZ')
 data['name']

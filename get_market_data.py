@@ -75,8 +75,20 @@ class GetTuShareData:
         return self.pro.fund_basic(market=market, status=status)
 
     def get_fund_portfolio(self, ts_code, end_date):
-        """获取公募基金持仓数据，季度更新"""
+        """获取公募基金持仓数据，季度更新 end_date 季报日期"""
         return self.pro.fund_portfolio(ts_code=ts_code, end_date=end_date)
+
+    def get_stock_name(self, ts_code):
+        """根据代码查询股票名称"""
+        return self.pro.stock_basic(ts_code=ts_code)['name']
+
+    def get_stock_name_batch(self, ts_code_list):
+        """根据代码批量查询股票名称"""
+        stock_dict = {'ts_code': [], 'name': []}
+        for code in ts_code_list:
+            stock_dict.get('ts_code').append(code)
+            stock_dict.get('name').append(self.pro.stock_basic(ts_code=code)['name'][0])
+        return pd.DataFrame().from_dict(stock_dict)
 
     @staticmethod
     def gen_cal_data(raw_data):
