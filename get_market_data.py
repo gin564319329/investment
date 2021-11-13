@@ -62,10 +62,10 @@ class GetTuShareData:
         # df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
         return df
 
-    def get_fund_nav(self, ts_code, start_date, end_date):
+    def get_fund_nav(self, ts_code, start_date='', end_date=''):
         """获取公募基金净值数据 含场内与场外"""
         df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        return df
+        return df.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'net_asset', 'adj_nav'])
 
     def get_fund_manager(self, ts_code):
         return self.pro.fund_manager(ts_code=ts_code)
@@ -73,6 +73,13 @@ class GetTuShareData:
     def get_fund_basic(self, market='E', status=''):
         """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         return self.pro.fund_basic(market=market, status=status)
+
+    def get_fund_share(self, ts_code):
+        """获取基金规模数据，包含上海和深圳ETF基金 fd_share 基金份额 亿份"""
+        fund_share = self.pro.fund_share(ts_code=ts_code)
+        share_y = fund_share['fd_share']/1e4
+        fund_share['fd_share'] = share_y.round(decimals=2)
+        return fund_share.get(['ts_code', 'trade_date', 'fd_share'])
 
     def get_fund_portfolio(self, ts_code, end_date):
         """获取公募基金持仓数据，季度更新 end_date 季报日期"""

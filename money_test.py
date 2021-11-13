@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from advance_fun import get_ts_code_by_code
 from get_market_data import GetCsvData, GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
@@ -14,29 +14,34 @@ import matplotlib
 import tushare as ts
 
 pd.set_option('display.max_columns', None)
-
-ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
-pro = ts.pro_api()
-df = pro.fund_share(ts_code='150018.SZ')
-
-#多只基金
-df = pro.fund_share(ts_code='150018.SZ,150008.SZ')
-
-date_start = '20151231'
-date_end = '20171231'
-ts_code = '162605.SZ'
-# ts_code = '000300.SH'
-# ts_code = '399905.SZ'
-weekday = 4
-m_day = 20
 get_data = GetTuShareData()
+ts_share = get_data.get_fund_share(ts_code='163406.SZ')
+print(ts_share)
+nav = get_data.get_fund_nav(ts_code='163406.SZ', start_date=20200930, end_date=20200930)
+print(nav)
+
+# sc = get_ts_code_by_code(code='163406', market='E')
+# print(sc)
+
+# ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
+# pro = ts.pro_api()
+# df = pro.fund_share(ts_code='150018.SZ')
+# date_start = '20151231'
+# date_end = '20171231'
+# ts_code = '162605.SZ'
+# # ts_code = '000300.SH'
+# # ts_code = '399905.SZ'
+# weekday = 4
+# m_day = 20
+
+
 
 # ss = get_data.get_stock_name('167508.SZ')
 # print(ss[0])
 
-portfolio = get_data.get_fund_portfolio('167508.SZ', end_date='20200630')
-folio = get_data.get_stock_name_batch(portfolio['symbol'].tolist())
-fio = pd.concat([portfolio, folio['name']], axis=1)
+# portfolio = get_data.get_fund_portfolio('167508.SZ', end_date='20200630')
+# folio = get_data.get_stock_name_batch(portfolio['symbol'].tolist())
+# fio = pd.concat([portfolio, folio['name']], axis=1)
 
 # tu_data = get_data.get_fund_daily(ts_code, date_start, date_end)
 # tu_basic = get_data.get_fund_basic(market='E', status='L')
@@ -65,5 +70,4 @@ fio = pd.concat([portfolio, folio['name']], axis=1)
 # df.to_excel()
 #
 #
-data = pro.stock_basic(ts_code='002120.SZ, 000001.SZ,000002.SZ')
-data['name']
+

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import logging
 from get_market_data import GetCsvData, GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
@@ -102,6 +102,16 @@ def cal_contrast(rst_df_raw):
     rst_ch_con['最大收益指数'] = rst_df_raw.iloc[:, 1:].idxmax(axis=1).values
     rst_ch_con['最小收益指数'] = rst_df_raw.iloc[:, 1:].idxmin(axis=1).values
     return rst_ch_con
+
+
+def get_ts_code_by_code(code, market='E'):
+    fund_bat = get_data.get_fund_basic(market=market, status='L')
+    for ts_code in fund_bat['ts_code']:
+        if code in ts_code:
+            return ts_code
+    logging.warning('there is no {} fund'.format(code))
+    return None
+
 
 
 if __name__ == '__main__':
