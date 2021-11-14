@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import numpy as np
+import time
 import pandas as pd
 import matplotlib.pyplot as plt
 import tushare as ts
@@ -56,23 +57,27 @@ class GetTuShareData:
     def get_index_basic(self, ts_code, name, market):
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
-    def get_fund_daily(self, ts_code, start_date, end_date):
+    def get_fund_basic(self, market='E', status='L'):
+        """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
+        fund_raw = self.pro.fund_basic(market=market, status=status)
+        return fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark'])
+
+    def get_fund_daily(self, ts_code, start_date='', end_date=''):
         """获取场内基金日线行情，类似股票日行情"""
-        df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        # df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
-        return df
+        df = self.pro.fund_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
+        return df_sort
 
     def get_fund_nav(self, ts_code, start_date='', end_date=''):
         """获取公募基金净值数据 含场内与场外"""
-        df = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        return df.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'net_asset', 'adj_nav'])
+        nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'net_asset'])
+        nav_sel_copy = nav_sel.copy()
+        nav_sel_copy['net_asset'] = (nav_sel['net_asset']/1e8).round(2)
+        return nav_sel_copy.drop_duplicates(["nav_date"], keep="last")
 
     def get_fund_manager(self, ts_code):
         return self.pro.fund_manager(ts_code=ts_code)
-
-    def get_fund_basic(self, market='E', status=''):
-        """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
-        return self.pro.fund_basic(market=market, status=status)
 
     def get_fund_share(self, ts_code):
         """获取基金规模数据，包含上海和深圳ETF基金 fd_share 基金份额 亿份"""
@@ -96,6 +101,25 @@ class GetTuShareData:
             stock_dict.get('ts_code').append(code)
             stock_dict.get('name').append(self.pro.stock_basic(ts_code=code)['name'][0])
         return pd.DataFrame().from_dict(stock_dict)
+
+    def search_net_asset(self, ts_code, start_date=''):
+        nav = self.get_fund_nav(ts_code, start_date=start_date)
+        return nav['net_asset'][nav['net_asset'].notnull()].iloc[0]
+
+    def append_fund_basic(self, fund_type='', start_date='', market='E', save_dir=''):
+        fund_e = self.get_fund_basic(market=market)
+        if not fund_type:
+            fund_sel = fund_e.copy()
+        else:
+            fund_sel = fund_e[fund_e['fund_type'] == fund_type]
+        fund_append = fund_sel.copy()
+        for row in fund_sel.itertuples():
+            print(row.Index, getattr(row, 'ts_code'))
+            time.sleep(0.8)
+            fund_append.loc[row.Index, 'net_asset'] = \
+                self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
+        fund_append.to_csv(save_dir, encoding='utf_8_sig')
+        return fund_append
 
     @staticmethod
     def gen_cal_data(raw_data):

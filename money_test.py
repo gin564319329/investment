@@ -6,7 +6,7 @@ from advance_fun import get_ts_code_by_code
 from get_market_data import GetCsvData, GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
-
+import time
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -15,10 +15,29 @@ import tushare as ts
 
 pd.set_option('display.max_columns', None)
 get_data = GetTuShareData()
-ts_share = get_data.get_fund_share(ts_code='163406.SZ')
-print(ts_share)
-nav = get_data.get_fund_nav(ts_code='163406.SZ', start_date=20200930, end_date=20200930)
-print(nav)
+# ts_share = get_data.get_fund_share(ts_code='163412.SZ')
+
+fund_e = get_data.get_fund_basic(market='E', status='L')
+set(fund_e['invest_type'].tolist())
+set(fund_e['fund_type'].tolist())
+ss = fund_e[fund_e['fund_type'] == '商品型']
+
+get_data.append_fund_basic(fund_type='', save_dir='D:\\project_codes\\fund_basic_e_all.csv')
+
+
+
+
+# print(ts_share)
+
+# date = 20210930
+# date_list = ts_share['trade_date'].tolist()
+# for date in date_list:
+#     nav = get_data.get_fund_nav(ts_code='163412.SZ', start_date=date, end_date=date)
+#     if nav.empty:
+#         print('date error')
+#     print(nav)
+# print(nav)
+
 
 # sc = get_ts_code_by_code(code='163406', market='E')
 # print(sc)
