@@ -72,6 +72,10 @@ class GetTuShareData:
         """获取公募基金净值数据 含场内与场外"""
         nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
         nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'net_asset'])
+        if nav_raw.empty:
+            return nav_sel
+        if nav_sel['net_asset'][0] is None:
+            return nav_sel.drop_duplicates(["nav_date"], keep="last")
         nav_sel_copy = nav_sel.copy()
         nav_sel_copy['net_asset'] = (nav_sel['net_asset']/1e8).round(2)
         return nav_sel_copy.drop_duplicates(["nav_date"], keep="last")
@@ -104,7 +108,9 @@ class GetTuShareData:
 
     def search_net_asset(self, ts_code, start_date=''):
         nav = self.get_fund_nav(ts_code, start_date=start_date)
-        return nav['net_asset'][nav['net_asset'].notnull()].iloc[0]
+        if not nav['net_asset'].notnull().sum():
+            return None, None
+        return nav['net_asset'][nav['net_asset'].notnull()].iloc[0], nav['nav_date'][nav['net_asset'].notnull()].iloc[0]
 
     def append_fund_basic(self, fund_type='', start_date='', market='E', save_dir=''):
         fund_e = self.get_fund_basic(market=market)
@@ -116,7 +122,7 @@ class GetTuShareData:
         for row in fund_sel.itertuples():
             print(row.Index, getattr(row, 'ts_code'))
             time.sleep(0.8)
-            fund_append.loc[row.Index, 'net_asset'] = \
+            fund_append.loc[row.Index, 'net_asset'],  fund_append.loc[row.Index, 'ann_date'] = \
                 self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
         fund_append.to_csv(save_dir, encoding='utf_8_sig')
         return fund_append

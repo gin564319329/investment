@@ -15,14 +15,17 @@ import tushare as ts
 
 pd.set_option('display.max_columns', None)
 get_data = GetTuShareData()
-# ts_share = get_data.get_fund_share(ts_code='163412.SZ')
+# ts_share = get_data.get_fund_nav(ts_code='163412.SZ')
+# ts_share = get_data.get_fund_nav(ts_code='013875.OF')
+# print(ts_share)
 
-fund_e = get_data.get_fund_basic(market='E', status='L')
-set(fund_e['invest_type'].tolist())
-set(fund_e['fund_type'].tolist())
-ss = fund_e[fund_e['fund_type'] == '商品型']
+# fund_e = get_data.get_fund_basic(market='O', status='L')
+# set(fund_e['invest_type'].tolist())
+# set(fund_e['fund_type'].tolist())
+# ss = fund_e[fund_e['fund_type'] == '商品型']
+# fund_e = get_data.get_fund_basic(market='O', status='L')
 
-get_data.append_fund_basic(fund_type='', save_dir='D:\\project_codes\\fund_basic_e_all.csv')
+get_data.append_fund_basic(fund_type='', market='E', save_dir='D:\\project_codes\\fund_basic_e_all1.csv')
 
 
 
