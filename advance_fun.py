@@ -113,7 +113,6 @@ def get_ts_code_by_code(code, market='E'):
     return None
 
 
-
 if __name__ == '__main__':
     # name_search_list = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
     name_search_list = ['上证指数', '上证50', '沪深300', '中证500', '创业板指']
