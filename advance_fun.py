@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import logging
-from get_market_data import GetCsvData, GetTuShareData
+from get_market_data import GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 
@@ -105,6 +105,7 @@ def cal_contrast(rst_df_raw):
 
 
 def get_ts_code_by_code(code, market='E'):
+    """查询tushare基金代码"""
     fund_bat = get_data.get_fund_basic(market=market, status='L')
     for ts_code in fund_bat['ts_code']:
         if code in ts_code:
@@ -113,10 +114,16 @@ def get_ts_code_by_code(code, market='E'):
     return None
 
 
+def dis_pd_style():
+    pd.set_option('display.unicode.ambiguous_as_wide', True)
+    pd.set_option('display.unicode.east_asian_width', True)
+    pd.set_option('display.width', 1)
+
+
 if __name__ == '__main__':
     # name_search_list = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
     name_search_list = ['上证指数', '上证50', '沪深300', '中证500', '创业板指']
-    name_search_list = ['沪深300', '中证500']
+    # name_search_list = ['沪深300', '中证500']
     search_rst = search_code_batch(name_search_list)
     print(search_rst)
 
@@ -149,9 +156,7 @@ if __name__ == '__main__':
     rst_ch_con.to_csv('D:\\project_codes\\investment\\ratio_rst_ch.csv', index=False, encoding='utf_8_sig')
     rst_in_con.to_csv('D:\\project_codes\\investment\\ratio_rst_in.csv', index=False, encoding='utf_8_sig')
 
-    pd.set_option('display.unicode.ambiguous_as_wide', True)
-    pd.set_option('display.unicode.east_asian_width', True)
-    pd.set_option('display.width', 1)
+    dis_pd_style()
     print(rst)
     print(rst_ch_con)
     print(rst_in_con)
