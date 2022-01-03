@@ -5,6 +5,6 @@
 *.xml
 /.idea/
 /__pycache__/
-/data/
 /Untitled.ipynb
 /rst_out/
+/.ipynb_checkpoints/
