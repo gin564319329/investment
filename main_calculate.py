@@ -16,9 +16,9 @@ logging.basicConfig(level=logging.INFO,
 
 def get_multi_fund_set(fund_type='', market='E'):
     get_data = GetTuShareData()
-    # fund_basic = get_data.get_fund_basic(market=market)
+    fund_basic = get_data.get_fund_basic(market=market)
 
-    fund_basic = get_data.append_fund_basic(fund_type=fund_type, market=market)
+    # fund_basic = get_data.append_fund_basic(fund_type=fund_type, market=market)
     if market == 'E':
         logging.info('Exchange fund number: {}'.format(fund_basic.shape[0]))
         fund_basic.to_csv(r'rst_out\fund_basic_exchange_a.csv', index=False, encoding='utf_8_sig')
@@ -27,17 +27,20 @@ def get_multi_fund_set(fund_type='', market='E'):
         fund_basic.to_csv(r'rst_out\fund_basic_open_a.csv', index=False, encoding='utf_8_sig')
     else:
         logging.warning('Error market type: {}'.format(market))
+    return fund_basic
 
 
-def cal_index_ratio_batch(name_search_list):
+def cal_index_ratio_batch(name_list, date_search):
     ad = AdvOperation(CalYieldRate())
-    search_rst = ad.search_code_batch(name_search_list)
-    date_search = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-                                  '20181228', '20191231', '20201231', '20111230'],
-                   'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-                                '20191231', '20201231', '20211231', '20211231']}
-    rst_con = ad.get_ratio_batch_by_date(date_search, search_rst)
+    code_rst = ad.query_index_tscode_by_name(name_list)
+    rst_con = ad.get_index_yield(date_search, code_rst)
     rst_con.to_csv(r'.\rst_out\inv_value_ratio.csv', index=False, encoding='utf_8_sig')
+
+
+def cal_fund_ratio_batch(query_list, date_search):
+    ad = AdvOperation(CalYieldRate())
+    rst_con = ad.get_fund_yield(date_search, query_list)
+    rst_con.to_csv(r'.\rst_out\fund_yield_rate.csv', index=False, encoding='utf_8_sig')
 
 
 def cal_invest_yield(ts_code, date_start, date_end):
@@ -81,12 +84,18 @@ def cal_invest_yield(ts_code, date_start, date_end):
 
 if __name__ == '__main__':
     # name_search = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
-    # name_search = ['上证指数', '沪深300', '中证500']
-    # cal_index_ratio_batch(name_search)
+    index_name = ['上证指数', '沪深300', '中证500']
+    # date_s = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
+    #                          '20181228', '20191231', '20201231', '20111230'],
+    #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
+    #                        '20191231', '20201231', '20211231', '20211231']}
+    date_s = {'date_start': ['20191231', '20201231', '20191231'],
+              'date_end': ['20201231', '20211231', '20211231']}
+    # cal_index_ratio_batch(index_name, date_s)
 
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
-    # code, start, end = '167508.SZ', '20200630', '20200930'
-
-    get_multi_fund_set(market='O')
+    fund = get_multi_fund_set(market='E')
+    fund_sel = fund[fund['fund_type'] == '商品型'].iloc[0:6, :]
+    cal_fund_ratio_batch(fund_sel, date_s)
