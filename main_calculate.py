@@ -2,6 +2,19 @@ from get_market_data import GetTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 from advance_fun import AdvOperation
+import pandas as pd
+
+
+pd.set_option('display.max_columns', None)
+
+
+def get_multi_fund_set(market='E'):
+    get_data = GetTuShareData()
+    fund_e = get_data.get_fund_basic(market=market)
+    # fund_append = get_data.append_fund_basic(fund_type='', market='E', save_dir=r'rst_out\fund_basic_e_all1'
+    #                                                                             r'.csv')
+    print('{} fund number: {}'.format(market, fund_e.shape[0]))
+    fund_e.to_csv(r'rst_out\fund_set_exchange.csv', index=False, encoding='utf_8_sig')
 
 
 def cal_value_ratio_batch(name_search_list):
@@ -25,10 +38,7 @@ def cal_value_ratio_batch(name_search_list):
     print(rst_in_con)
 
 
-def cal_invest_yield():
-    date_start = '20151231'
-    date_end = '20171231'
-    ts_code = '000300.SH'  # '000001.SH'
+def cal_invest_yield(ts_code, date_start, date_end):
     weekday = 4
     m_day = 20
     tu_data = GetTuShareData().get_index_daily(ts_code, date_start, date_end)
@@ -68,10 +78,18 @@ def cal_invest_yield():
 
 
 if __name__ == '__main__':
-    name_search = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
-    cal_value_ratio_batch(name_search)
+    # name_search = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
+    # cal_value_ratio_batch(name_search)
 
-    # cal_invest_yield()
+    # code, start, end = '000300.SH', '20151231', '20171231'
+    # cal_invest_yield(code, start, end)
+
+    # code, start, end = '167508.SZ', '20200630', '20200930'
+
+    get_multi_fund_set()
+
+
+
 
 
 
