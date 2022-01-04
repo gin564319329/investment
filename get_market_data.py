@@ -13,16 +13,17 @@ class GetTuShareData:
     def get_index_daily(self, ts_code, start_date, end_date):
         df = self.pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
         df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
-        # df_sort.to_csv('D:\\2 Project codes\\investment\\data\\300_pro.csv')
         return df_sort
 
-    def get_index_basic(self, ts_code, name, market):
+    def get_index_basic(self, ts_code, name, market='CSI'):
+        """获取指数列表 基础信息"""
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
     def get_fund_basic(self, market='E', status='L'):
-        """交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
+        """获取基金列表 基础信息； 交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         fund_raw = self.pro.fund_basic(market=market, status=status)
-        return fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark'])
+        return fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
+                             'm_fee', 'c_fee'])
 
     def get_fund_daily(self, ts_code, start_date='', end_date=''):
         """获取场内基金日线行情，类似股票日行情"""
@@ -74,20 +75,19 @@ class GetTuShareData:
             return None, None
         return nav['net_asset'][nav['net_asset'].notnull()].iloc[0], nav['nav_date'][nav['net_asset'].notnull()].iloc[0]
 
-    def append_fund_basic(self, fund_type='', start_date='', market='E', save_dir=''):
+    def append_fund_basic(self, fund_type='', start_date='', market='E'):
         """增加净资产信息"""
-        fund_e = self.get_fund_basic(market=market)
+        fund_b = self.get_fund_basic(market=market)
         if not fund_type:
-            fund_sel = fund_e.copy()
+            fund_sel = fund_b.copy()
         else:
-            fund_sel = fund_e[fund_e['fund_type'] == fund_type]
+            fund_sel = fund_b[fund_b['fund_type'] == fund_type]
         fund_append = fund_sel.copy()
         for row in fund_sel.itertuples():
             print(row.Index, getattr(row, 'ts_code'))
             time.sleep(0.8)
             fund_append.loc[row.Index, 'net_asset'],  fund_append.loc[row.Index, 'ann_date'] = \
                 self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
-        fund_append.to_csv(save_dir, encoding='utf_8_sig')
         return fund_append
 
     @staticmethod

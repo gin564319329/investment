@@ -75,16 +75,17 @@ class AdvOperation(GetTuShareData):
                 print('{} {} irri profit: {:.2%}'.format(cal_data_tu.iloc[-1]['year'], name, in_ratio))
         rst_dict_date['year'][-1] = 'all'
         rst_data = pd.DataFrame(rst_dict_date)
-        rst_df_ch = pd.concat([rst_data, pd.DataFrame(rst_dict_ch)], axis=1)
-        rst_df_in = pd.concat([rst_data, pd.DataFrame(rst_dict_in)], axis=1)
-        rst_df = pd.concat([rst_data, pd.DataFrame(rst_dict_ch), pd.DataFrame(rst_dict_in)], axis=1)
-        return rst_df, rst_df_ch, rst_df_in
+        rst_df_ch = pd.DataFrame(rst_dict_ch)
+        rst_df_in = pd.DataFrame(rst_dict_in)
+        rst_t = pd.concat([rst_data, self.cal_contrast(rst_df_ch), self.cal_contrast(rst_df_in)], axis=1)
+
+        return rst_t
 
     @staticmethod
     def cal_contrast(rst_df_raw):
         rst_ch_con = rst_df_raw.copy()
-        rst_ch_con['最大收益指数'] = rst_df_raw.iloc[:, 1:].idxmax(axis=1).values
-        rst_ch_con['最小收益指数'] = rst_df_raw.iloc[:, 1:].idxmin(axis=1).values
+        rst_ch_con['最大收益指数'] = rst_df_raw.idxmax(axis=1).values
+        rst_ch_con['最小收益指数'] = rst_df_raw.idxmin(axis=1).values
         return rst_ch_con
 
     def get_ts_code_by_code(self, code, market='E'):

@@ -10,13 +10,16 @@ import time
 import requests
 from bs4 import BeautifulSoup
 import re
-import matplotlib
 import tushare as ts
 
 pd.set_option('display.max_columns', None)
 get_data = GetTuShareData()
+index_code = '000300.SH'
+index_info = get_data.get_index_basic('000001.SH', '', market='SSE')
+print(index_info)
 
-ts_code, date_start, date_end = '167508.SZ', '20200630', '20200930'
+
+ts_code, date_start, date_end = '163402.SZ', '20200630', '20211231'
 fund_nav = get_data.get_fund_nav(ts_code=ts_code)
 fund_daily = get_data.get_fund_daily(ts_code, date_start, date_end)
 fund_nav.to_csv(r'rst_out\fund_nav.csv', index=False)
@@ -26,8 +29,7 @@ set(fund_e['invest_type'].tolist())
 set(fund_e['fund_type'].tolist())
 ss = fund_e[fund_e['fund_type'] == '商品型']
 
-fund_append = get_data.append_fund_basic(fund_type='', market='E', save_dir=r'rst_out\fund_basic_e_all1'
-                                                                            r'.csv')
+fund_append = get_data.append_fund_basic(fund_type='', market='E')
 fund_e.to_csv(r'rst_out\fund_open_delist1.csv', index=False, encoding='utf_8_sig')
 
 ad = AdvOperation(CalYieldRate())
