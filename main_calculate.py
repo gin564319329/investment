@@ -6,6 +6,9 @@ import pandas as pd
 import logging
 
 pd.set_option('display.max_columns', None)
+pd.set_option('display.unicode.ambiguous_as_wide', True)
+pd.set_option('display.unicode.east_asian_width', True)
+pd.set_option('display.width', 1)
 # logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s',
@@ -14,11 +17,10 @@ logging.basicConfig(level=logging.INFO,
                     filemode='a')
 
 
-def get_multi_fund_set(fund_type='', market='E'):
+def save_fund_with_basic(fund_type='', market='E'):
     get_data = GetTuShareData()
-    # fund_basic = get_data.get_fund_basic(market=market)
-
-    fund_basic = get_data.append_fund_basic(fund_type=fund_type, market=market)
+    fund_basic = get_data.get_fund_basic(market=market,  fund_type=fund_type)
+    fund_basic = get_data.append_fund_basic(fund_basic)
     if market == 'E':
         logging.info('Exchange fund number: {}'.format(fund_basic.shape[0]))
         fund_basic.to_csv(r'rst_out\fund_basic_exchange_a.csv', index=False, encoding='utf_8_sig')
@@ -30,17 +32,25 @@ def get_multi_fund_set(fund_type='', market='E'):
     return fund_basic
 
 
-def cal_index_ratio_batch(name_list, date_search):
+def save_index_ratio(date_query, name_list, save_dir):
     ad = AdvOperation()
     code_rst = ad.query_index_tscode_by_name(name_list)
-    rst_con = ad.get_index_yield(date_search, code_rst)
-    rst_con.to_csv(r'.\rst_out\inv_value_ratio.csv', index=False, encoding='utf_8_sig')
+    rst_con = ad.gen_index_yield(date_query, code_rst)
+    rst_con.to_csv(save_dir, index=True, encoding='utf_8_sig')
+    return rst_con
 
 
-def cal_fund_ratio_batch(date_query, fund_query, save_dir):
+def save_fund_with_ratio(date_query, save_dir, code_list=(), fund_type='', market='E'):
+    get_data = GetTuShareData()
+    fund_basic = get_data.get_fund_basic(market=market, fund_type=fund_type)
+    if not code_list:
+        fund_query = fund_basic.copy()
+    else:
+        fund_query = fund_basic[fund_basic['ts_code'].isin(code_list)]
     ad = AdvOperation()
-    rst_con = ad.get_fund_yield_year(date_query, fund_query)
+    rst_con = ad.append_fund_yield(date_query, fund_query)
     rst_con.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return rst_con
 
 
 def cal_invest_yield(ts_code, date_start, date_end):
@@ -60,7 +70,6 @@ def cal_invest_yield(ts_code, date_start, date_end):
     print(
         'month: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_m, final_amount_m, profit_m,
                                                                                  buy_num_m))
-
     # cal_time = CalTime(date_start, date_end)
     # month_num = cal_time.cal_month_num()
     # x_ticks = cal_time.gen_ticks(month_num)
@@ -83,22 +92,23 @@ def cal_invest_yield(ts_code, date_start, date_end):
 
 
 if __name__ == '__main__':
-    # name_search = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
-    index_name = ['上证指数', '沪深300', '中证500']
-    # date_s = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-    #                          '20181228', '20191231', '20201231', '20111230'],
-    #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-    #                        '20191231', '20201231', '20211231', '20211231']}
-    date_s = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
-              'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
-              'query_period': ['2018', '2019', '2020', '2021', 'all']}
-    # cal_index_ratio_batch(index_name, date_s)
-
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
-    save_file = r'.\rst_out\fund_yield_rate.csv'
-    fund = get_data.get_fund_basic(market=market)
-    fund_sel = fund[fund['fund_type'] == '混合型'].loc[1061:1070, :]
-    print(fund_sel)
-    cal_fund_ratio_batch(date_s, fund_sel, save_file)
+    # index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
+    # date_s = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
+    #                          '20181228', '20191231', '20201231', '20111230'],
+    #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
+    #                        '20191231', '20201231', '20211231', '20211231'],
+    #           'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', 'all']}
+    # index_name = ['上证指数', '沪深300', '中证500']
+    date_s = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
+              'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
+              'query_period': ['2018', '2019', '2020', '2021', 'all']}
+    # save_file = r'.\rst_out\index_yield_rate_t.csv'
+    # rst = save_index_ratio(date_s, index_name, save_file)
+
+    save_file = r'.\rst_out\fund_yield_rate_t1.csv'
+    code = ('159934.SZ', '518880.SH', '518800.SH')
+    rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type='')
+    print(rst)

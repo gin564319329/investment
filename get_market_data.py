@@ -19,11 +19,16 @@ class GetTuShareData:
         """获取指数列表 基础信息"""
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
-    def get_fund_basic(self, market='E', status='L'):
+    def get_fund_basic(self, market='E', status='L', fund_type=''):
         """获取基金列表 基础信息； 交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         fund_raw = self.pro.fund_basic(market=market, status=status)
-        return fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
-                             'm_fee', 'c_fee'])
+        fund_raw = fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
+                                 'm_fee', 'c_fee'])
+        if not fund_type:
+            fund_sel = fund_raw.copy()
+        else:
+            fund_sel = fund_raw[fund_raw['fund_type'] == fund_type]
+        return fund_sel
 
     def get_fund_daily(self, ts_code, start_date='', end_date=''):
         """获取场内基金日线行情，类似股票日行情"""
@@ -40,7 +45,7 @@ class GetTuShareData:
         if nav_sel['net_asset'][0] is None:
             return nav_sel.drop_duplicates(["nav_date"], keep="last")
         nav_sel_copy = nav_sel.copy()
-        nav_sel_copy['net_asset'] = (nav_sel['net_asset']/1e8).round(2)
+        nav_sel_copy['net_asset'] = (nav_sel['net_asset'] / 1e8).round(2)
         return nav_sel_copy.drop_duplicates(["nav_date"], keep="last")
 
     def get_fund_manager(self, ts_code):
@@ -49,7 +54,7 @@ class GetTuShareData:
     def get_fund_share(self, ts_code):
         """获取基金规模数据，包含上海和深圳ETF基金 fd_share 基金份额 亿份"""
         fund_share = self.pro.fund_share(ts_code=ts_code)
-        share_y = fund_share['fd_share']/1e4
+        share_y = fund_share['fd_share'] / 1e4
         fund_share['fd_share'] = share_y.round(decimals=2)
         return fund_share.get(['ts_code', 'trade_date', 'fd_share'])
 
@@ -75,18 +80,13 @@ class GetTuShareData:
             return None, None
         return nav['net_asset'][nav['net_asset'].notnull()].iloc[0], nav['nav_date'][nav['net_asset'].notnull()].iloc[0]
 
-    def append_fund_basic(self, fund_type='', start_date='', market='E'):
+    def append_fund_basic(self, fund_basic, start_date=''):
         """增加净资产信息"""
-        fund_b = self.get_fund_basic(market=market)
-        if not fund_type:
-            fund_sel = fund_b.copy()
-        else:
-            fund_sel = fund_b[fund_b['fund_type'] == fund_type]
-        fund_append = fund_sel.copy()
-        for row in fund_sel.itertuples():
+        fund_append = fund_basic.copy()
+        for row in fund_basic.itertuples():
             print(row.Index, getattr(row, 'ts_code'))
             time.sleep(0.8)
-            fund_append.loc[row.Index, 'net_asset'],  fund_append.loc[row.Index, 'ann_date'] = \
+            fund_append.loc[row.Index, 'net_asset'], fund_append.loc[row.Index, 'ann_date'] = \
                 self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
         return fund_append
 
@@ -109,4 +109,3 @@ class GetTuShareData:
         cal_data['weekday'] = weekday_list
         cal_data['price'] = raw_data['close']
         return cal_data
-
