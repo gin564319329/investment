@@ -7,14 +7,14 @@ from fund_tools import CalFixedInvest, CalYieldRate
 
 class AdvOperation(GetTuShareData):
 
-    def __init__(self, cal_tools):
+    def __init__(self):
         super(AdvOperation, self).__init__()
-        self.cal_base = cal_tools
+        self.cal_base = CalYieldRate()
 
     def get_index_daily_data(self, ts_code, date_start, date_end):
         tu_data = self.get_index_daily(ts_code, date_start, date_end)
-        cal_data_tu = self.gen_cal_data(tu_data)
-        return cal_data_tu
+        index_for_cal = self.gen_cal_data(tu_data)
+        return index_for_cal
 
     def query_index_tscode_by_name(self, search_list):
         df_sh = self.get_index_basic('', '', market='SSE')
@@ -37,17 +37,16 @@ class AdvOperation(GetTuShareData):
 
         return search_dict
 
-    def get_change_ratio(self, cal_data_tu):
-        st = cal_data_tu.iloc[0]['price']
-        end = cal_data_tu.iloc[-1]['price']
+    def cal_index_change_ratio(self, index_daily):
+        st = index_daily.iloc[0]['price']
+        end = index_daily.iloc[-1]['price']
         c_ratio = self.cal_base.cal_change_ratio(st, end)
         return c_ratio
 
-    def get_invest_rst(self, cal_data_tu):
-        weekday = 4
-        fit = CalFixedInvest(cal_data_tu, money_amount=500)
-        df_invest_data_w = fit.fixed_invest_by_week(weekday=weekday)
-        principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = fit.cal_yield(df_invest_data_w)
+    def cal_fixed_inv_change_ratio(self, index_daily):
+        fit = CalFixedInvest(index_daily, money_amount=500)
+        invest_data = fit.fixed_invest_by_week(weekday=4)
+        principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = fit.cal_yield(invest_data)
         i_ratio = self.cal_base.cal_change_ratio(principal_w, final_amount_w)
         return i_ratio
 
@@ -57,15 +56,6 @@ class AdvOperation(GetTuShareData):
         c_ratio = self.cal_base.cal_change_ratio(st, end)
         return c_ratio
 
-    def get_ratio_batch(self, date_search_dict, ts_code_list):
-        for code in ts_code_list:
-            for start, end in zip(date_search_dict['date_start'], date_search_dict['date_end']):
-                cal_data_tu = self.get_index_daily_data(code, start, end)
-                ch_ratio = self.get_change_ratio(cal_data_tu)
-                print('{} {} change ratio: {:.2%}'.format(cal_data_tu.iloc[-1]['year'], code, ch_ratio))
-                in_ratio = self.get_invest_rst(cal_data_tu)
-                print('{} {} irri profit: {:.2%}'.format(cal_data_tu.iloc[-1]['year'], code, in_ratio))
-
     def get_index_yield(self, date_search_dict, code_search_dict):
         rst_dict_date = {'year': []}
         rst_dict_ch = {'{}_涨跌幅'.format(na): [] for na in code_search_dict.get('name')}
@@ -74,8 +64,8 @@ class AdvOperation(GetTuShareData):
             rst_dict_date['year'].append(end[0:4])
             for code, name in zip(code_search_dict.get('ts_code'), code_search_dict.get('name')):
                 cal_data_tu = self.get_index_daily_data(code, start, end)
-                ch_ratio = self.get_change_ratio(cal_data_tu)
-                in_ratio = self.get_invest_rst(cal_data_tu)
+                ch_ratio = self.cal_index_change_ratio(cal_data_tu)
+                in_ratio = self.cal_fixed_inv_change_ratio(cal_data_tu)
                 rst_dict_ch['{}_涨跌幅'.format(name)].append(ch_ratio)
                 rst_dict_in['{}_定投收益'.format(name)].append(in_ratio)
                 print('{} {} change ratio: {:.2%}'.format(cal_data_tu.iloc[-1]['year'], name, ch_ratio))
@@ -149,7 +139,7 @@ if __name__ == '__main__':
     ad = AdvOperation(CalYieldRate())
     cal_data = ad.get_index_daily_data('000001.SH', '20201231', '20211231')
     print(cal_data.iloc[0]['date'], cal_data.iloc[-1]['date'])
-    ch_r = ad.get_change_ratio(cal_data)
+    ch_r = ad.cal_index_change_ratio(cal_data)
     print('{:.2%}'.format(ch_r))
-    in_r = ad.get_invest_rst(cal_data)
+    in_r = ad.cal_fixed_inv_change_ratio(cal_data)
     print('irri profit: {:.2%}'.format(in_r))

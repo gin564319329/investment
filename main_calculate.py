@@ -31,14 +31,14 @@ def get_multi_fund_set(fund_type='', market='E'):
 
 
 def cal_index_ratio_batch(name_list, date_search):
-    ad = AdvOperation(CalYieldRate())
+    ad = AdvOperation()
     code_rst = ad.query_index_tscode_by_name(name_list)
     rst_con = ad.get_index_yield(date_search, code_rst)
     rst_con.to_csv(r'.\rst_out\inv_value_ratio.csv', index=False, encoding='utf_8_sig')
 
 
 def cal_fund_ratio_batch(date_query, fund_query, save_dir):
-    ad = AdvOperation(CalYieldRate())
+    ad = AdvOperation()
     rst_con = ad.get_fund_yield_year(date_query, fund_query)
     rst_con.to_csv(save_dir, index=False, encoding='utf_8_sig')
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # cal_invest_yield(code, start, end)
 
     save_file = r'.\rst_out\fund_yield_rate.csv'
-    fund = get_multi_fund_set(market='E')
-    # fund_sel = fund[fund['fund_type'] == '混合型'].loc[1061:1070, :]
-    # print(fund_sel)
-    # cal_fund_ratio_batch(date_s, fund_sel, save_file)
+    fund = get_data.get_fund_basic(market=market)
+    fund_sel = fund[fund['fund_type'] == '混合型'].loc[1061:1070, :]
+    print(fund_sel)
+    cal_fund_ratio_batch(date_s, fund_sel, save_file)
