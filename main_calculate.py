@@ -16,9 +16,9 @@ logging.basicConfig(level=logging.INFO,
 
 def get_multi_fund_set(fund_type='', market='E'):
     get_data = GetTuShareData()
-    fund_basic = get_data.get_fund_basic(market=market)
+    # fund_basic = get_data.get_fund_basic(market=market)
 
-    # fund_basic = get_data.append_fund_basic(fund_type=fund_type, market=market)
+    fund_basic = get_data.append_fund_basic(fund_type=fund_type, market=market)
     if market == 'E':
         logging.info('Exchange fund number: {}'.format(fund_basic.shape[0]))
         fund_basic.to_csv(r'rst_out\fund_basic_exchange_a.csv', index=False, encoding='utf_8_sig')
@@ -37,10 +37,10 @@ def cal_index_ratio_batch(name_list, date_search):
     rst_con.to_csv(r'.\rst_out\inv_value_ratio.csv', index=False, encoding='utf_8_sig')
 
 
-def cal_fund_ratio_batch(query_list, date_search):
+def cal_fund_ratio_batch(date_query, fund_query, save_dir):
     ad = AdvOperation(CalYieldRate())
-    rst_con = ad.get_fund_yield(date_search, query_list)
-    rst_con.to_csv(r'.\rst_out\fund_yield_rate.csv', index=False, encoding='utf_8_sig')
+    rst_con = ad.get_fund_yield_year(date_query, fund_query)
+    rst_con.to_csv(save_dir, index=False, encoding='utf_8_sig')
 
 
 def cal_invest_yield(ts_code, date_start, date_end):
@@ -89,13 +89,16 @@ if __name__ == '__main__':
     #                          '20181228', '20191231', '20201231', '20111230'],
     #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
     #                        '20191231', '20201231', '20211231', '20211231']}
-    date_s = {'date_start': ['20191231', '20201231', '20191231'],
-              'date_end': ['20201231', '20211231', '20211231']}
+    date_s = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
+              'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
+              'query_period': ['2018', '2019', '2020', '2021', 'all']}
     # cal_index_ratio_batch(index_name, date_s)
 
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
+    save_file = r'.\rst_out\fund_yield_rate.csv'
     fund = get_multi_fund_set(market='E')
-    fund_sel = fund[fund['fund_type'] == '商品型'].iloc[0:6, :]
-    cal_fund_ratio_batch(fund_sel, date_s)
+    # fund_sel = fund[fund['fund_type'] == '混合型'].loc[1061:1070, :]
+    # print(fund_sel)
+    # cal_fund_ratio_batch(date_s, fund_sel, save_file)

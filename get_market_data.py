@@ -85,7 +85,7 @@ class GetTuShareData:
         fund_append = fund_sel.copy()
         for row in fund_sel.itertuples():
             print(row.Index, getattr(row, 'ts_code'))
-            # time.sleep(0.8)
+            time.sleep(0.8)
             fund_append.loc[row.Index, 'net_asset'],  fund_append.loc[row.Index, 'ann_date'] = \
                 self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
         return fund_append

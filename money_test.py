@@ -19,7 +19,7 @@ index_info = get_data.get_index_basic('000001.SH', '', market='SSE')
 print(index_info)
 
 
-ts_code, date_start, date_end = '163402.SZ', '20200630', '20211231'
+ts_code, date_start, date_end = '161005.SZ', '20170630', '20220105'
 fund_nav = get_data.get_fund_nav(ts_code=ts_code)
 fund_daily = get_data.get_fund_daily(ts_code, date_start, date_end)
 fund_nav.to_csv(r'rst_out\fund_nav.csv', index=False)

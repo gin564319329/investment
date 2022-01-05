@@ -52,7 +52,7 @@ class AdvOperation(GetTuShareData):
         return i_ratio
 
     def cal_fund_change_ratio(self, fund_nav):
-        st = fund_nav.iloc[-1]['adj_nav']
+        st = fund_nav.iloc[-1]['adj_nav']  # accum_nav adj_nav
         end = fund_nav.iloc[0]['adj_nav']
         c_ratio = self.cal_base.cal_change_ratio(st, end)
         return c_ratio
@@ -107,6 +107,20 @@ class AdvOperation(GetTuShareData):
         rst_df_ch = pd.DataFrame(rst_change)
 
         return pd.concat([rst_data, self.cal_contrast(rst_df_ch)], axis=1)
+
+    def get_fund_yield_year(self, date_query, fund_query):
+        fund_yield = fund_query.copy()
+        for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
+            for index, row in fund_query.iterrows():
+                fund_nav = self.get_fund_nav(row.get('ts_code'), start, end)
+                if fund_nav.empty:
+                    fund_yield.at[index, per] = np.NAN
+                    print('{} {} no data'.format(per, row.get('name')))
+                    continue
+                fund_yield.at[index, per] = self.cal_fund_change_ratio(fund_nav)
+                print('{} {} fund yield rate: {:.2%}'.format(per, row.get('name'), fund_yield.at[index, per]))
+
+        return fund_yield
 
     @staticmethod
     def cal_contrast(rst_df_raw):
