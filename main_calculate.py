@@ -117,14 +117,15 @@ if __name__ == '__main__':
     # rst = save_index_ratio(date_s, index_name, save_file)
 
     # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
-    save_file = r'rst_out\fund_basic_exchange_commodity_rate.csv'
-    # save_file = r'rst_out\fund_basic_open_all.csv'
-    input_file = r'rst_out\fund_basic_exchange_commodity.csv'
+    # save_file = r'rst_out\fund_basic_exchange_commodity_rate.csv'
+    save_file = r'rst_out\fund_basic_open_all.csv'
+    # save_file = r'rst_out\fund_basic_exchange_all.csv'
+    # input_file = r'rst_out\fund_basic_exchange_commodity.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
-    rst = save_fund_with_ratio(date_s, save_file, code_list=(), input_dir='', market='E', fund_type=None)
+    # rst = save_fund_with_ratio(date_s, save_file, code_list=(), input_dir=input_file, market='E', fund_type=None)
     # print(rst)
 
-    # fund_all = save_fund_with_basic(save_file, fund_type=None, market='O')
+    fund_all = save_fund_with_basic(save_file, fund_type=None, market='O')
 
     # save_file = r'rst_out\fund_basic_exchange_reit.csv'
     # fund_t = save_fund_with_basic_temp(save_file, market='E')

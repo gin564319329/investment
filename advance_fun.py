@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 import logging
@@ -81,6 +82,7 @@ class AdvOperation(GetTuShareData):
         for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
             for index, row in fund_query.iterrows():
                 fund_nav = self.query_fund_nav(row.get('ts_code'), start, end)
+                time.sleep(0.8)
                 if fund_nav.empty:
                     fund_yield.at[index, per] = np.NAN
                     print('{} {} no data'.format(per, row.get('name')))
