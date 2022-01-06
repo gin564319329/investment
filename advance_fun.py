@@ -12,13 +12,13 @@ class AdvOperation(GetTuShareData):
         self.cal_base = CalYieldRate()
 
     def get_index_daily_data(self, ts_code, date_start, date_end):
-        tu_data = self.get_index_daily(ts_code, date_start, date_end)
+        tu_data = self.query_index_daily(ts_code, date_start, date_end)
         index_for_cal = self.gen_cal_data(tu_data)
         return index_for_cal
 
     def query_index_tscode_by_name(self, search_list):
-        df_sh = self.get_index_basic('', '', market='SSE')
-        df_sz = self.get_index_basic('', '', market='SZSE')
+        df_sh = self.query_index_basic('', '', market='SSE')
+        df_sz = self.query_index_basic('', '', market='SZSE')
         search_dict = {'ts_code': [], 'name': []}
 
         for index, s in df_sh.iterrows():
@@ -80,7 +80,7 @@ class AdvOperation(GetTuShareData):
         fund_yield = fund_query.copy()
         for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
             for index, row in fund_query.iterrows():
-                fund_nav = self.get_fund_nav(row.get('ts_code'), start, end)
+                fund_nav = self.query_fund_nav(row.get('ts_code'), start, end)
                 if fund_nav.empty:
                     fund_yield.at[index, per] = np.NAN
                     print('{} {} no data'.format(per, row.get('name')))
@@ -96,15 +96,6 @@ class AdvOperation(GetTuShareData):
         yield_con['最优{}'.format(key)] = yield_df.idxmax(axis=1).values
         yield_con['最差{}'.format(key)] = yield_df.idxmin(axis=1).values
         return yield_con
-
-    def get_ts_code_by_code(self, code, market='E'):
-        """查询tushare基金代码"""
-        fund_bat = self.get_fund_basic(market=market, status='L')
-        for ts_code in fund_bat['ts_code']:
-            if code in ts_code:
-                return ts_code
-        logging.warning('there is no {} fund'.format(code))
-        return None
 
 
 if __name__ == '__main__':

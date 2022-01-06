@@ -17,18 +17,12 @@ logging.basicConfig(level=logging.INFO,
                     filemode='a')
 
 
-def save_fund_with_basic(fund_type='', market='E'):
+def save_fund_with_basic(save_dir, fund_type=None, market='E'):
     get_data = GetTuShareData()
-    fund_basic = get_data.get_fund_basic(market=market,  fund_type=fund_type)
+    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
     fund_basic = get_data.append_fund_basic(fund_basic)
-    if market == 'E':
-        logging.info('Exchange fund number: {}'.format(fund_basic.shape[0]))
-        fund_basic.to_csv(r'rst_out\fund_basic_exchange_a.csv', index=False, encoding='utf_8_sig')
-    elif market == 'O':
-        logging.info('Open fund number: {}'.format(fund_basic.shape[0]))
-        fund_basic.to_csv(r'rst_out\fund_basic_open_a.csv', index=False, encoding='utf_8_sig')
-    else:
-        logging.warning('Error market type: {}'.format(market))
+    logging.info('{} fund number: {}'.format(market, fund_basic.shape[0]))
+    fund_basic.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_basic
 
 
@@ -40,9 +34,9 @@ def save_index_ratio(date_query, name_list, save_dir):
     return rst_con
 
 
-def save_fund_with_ratio(date_query, save_dir, code_list=(), fund_type='', market='E'):
+def save_fund_with_ratio(date_query, save_dir, code_list=(), fund_type=None, market='E'):
     get_data = GetTuShareData()
-    fund_basic = get_data.get_fund_basic(market=market, fund_type=fund_type)
+    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
     if not code_list:
         fund_query = fund_basic.copy()
     else:
@@ -56,7 +50,7 @@ def save_fund_with_ratio(date_query, save_dir, code_list=(), fund_type='', marke
 def cal_invest_yield(ts_code, date_start, date_end):
     weekday = 4
     m_day = 20
-    tu_data = GetTuShareData().get_index_daily(ts_code, date_start, date_end)
+    tu_data = GetTuShareData().query_index_daily(ts_code, date_start, date_end)
     cal_data_tu = GetTuShareData().gen_cal_data(tu_data)
 
     fit = CalFixedInvest(cal_data_tu, money_amount=500)
@@ -101,7 +95,7 @@ if __name__ == '__main__':
     #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
     #                        '20191231', '20201231', '20211231', '20211231'],
     #           'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', 'all']}
-    # index_name = ['上证指数', '沪深300', '中证500']
+    index_name = ['上证指数', '沪深300', '中证500']
     date_s = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
               'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
               'query_period': ['2018', '2019', '2020', '2021', 'all']}
@@ -109,6 +103,9 @@ if __name__ == '__main__':
     # rst = save_index_ratio(date_s, index_name, save_file)
 
     save_file = r'.\rst_out\fund_yield_rate_t1.csv'
+    save_file = r'rst_out\fund_basic_exchange_a.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
-    rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type='')
+    rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type=None, market='E')
     print(rst)
+
+    fund_all = save_fund_with_basic(fund_type=['商品型', '另类投资型'], market='E')
