@@ -16,7 +16,7 @@ class AdvOperation(GetTuShareData):
         index_for_cal = self.gen_cal_data(tu_data)
         return index_for_cal
 
-    def query_index_tscode_by_name(self, search_list):
+    def get_index_tscode_by_name(self, search_list):
         df_sh = self.query_index_basic('', '', market='SSE')
         df_sz = self.query_index_basic('', '', market='SZSE')
         search_dict = {'ts_code': [], 'name': []}

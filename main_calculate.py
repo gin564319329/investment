@@ -4,8 +4,6 @@ from show_rst import ShowRst
 from advance_fun import AdvOperation
 import pandas as pd
 import logging
-import os
-import shutil
 
 
 pd.set_option('display.max_columns', None)
@@ -29,23 +27,34 @@ def save_fund_with_basic(save_dir, fund_type=None, market='E'):
     return fund_basic
 
 
+def save_fund_with_basic_temp(save_dir, fund_type=None, market='E'):
+    get_data = GetTuShareData()
+    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
+    fund_reit = fund_basic[fund_basic['invest_type'].isnull()]
+    fund_reit_a = get_data.append_fund_basic(fund_reit)
+    logging.info('{} fund number: {}'.format(market, fund_reit_a.shape[0]))
+    fund_reit_a.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return fund_reit_a
+
+
 def save_index_ratio(date_query, name_list, save_dir):
     ad = AdvOperation()
-    code_rst = ad.query_index_tscode_by_name(name_list)
+    code_rst = ad.get_index_tscode_by_name(name_list)
     rst_con = ad.gen_index_yield(date_query, code_rst)
     rst_con.to_csv(save_dir, index=True, encoding='utf_8_sig')
     return rst_con
 
 
-def save_fund_with_ratio(date_query, save_dir, code_list=(), fund_type=None, market='E'):
-    get_data = GetTuShareData()
-    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
-    if not code_list:
-        fund_query = fund_basic.copy()
+def save_fund_with_ratio(date_query, save_dir, code_list=(), input_dir='', market='E', fund_type=None):
+    if not input_dir:
+        fund_basic = GetTuShareData().query_fund_basic(market=market, fund_type=fund_type)
     else:
-        fund_query = fund_basic[fund_basic['ts_code'].isin(code_list)]
-    ad = AdvOperation()
-    rst_con = ad.append_fund_yield(date_query, fund_query)
+        fund_basic = pd.read_csv(input_dir)
+    if not code_list:
+        fund_sel = fund_basic.copy()
+    else:
+        fund_sel = fund_basic[fund_basic['ts_code'].isin(code_list)]
+    rst_con = AdvOperation().append_fund_yield(date_query, fund_sel)
     rst_con.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return rst_con
 
@@ -89,6 +98,8 @@ def cal_invest_yield(ts_code, date_start, date_end):
 
 
 if __name__ == '__main__':
+    # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
+
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
@@ -106,11 +117,16 @@ if __name__ == '__main__':
     # rst = save_index_ratio(date_s, index_name, save_file)
 
     # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
-    save_file = r'rst_out\fund_basic_exchange_a1.csv'
+    # save_file = r'rst_out\fund_basic_exchange_commodity.csv'
+    save_file = r'rst_out\fund_basic_open_all.csv'
+    input_file = r'rst_out\fund_basic_exchange_commodity.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
-    # rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type=None, market='E')
+    rst = save_fund_with_ratio(date_s, save_file, code_list=(), input_dir='', market='E', fund_type=None)
     # print(rst)
 
-    fund_all = save_fund_with_basic(save_file, fund_type=['商品型', '另类投资型'], market='E')
-    # print(fund_all)
+    # fund_all = save_fund_with_basic(save_file, fund_type=None, market='O')
+
+    # save_file = r'rst_out\fund_basic_exchange_reit.csv'
+    # fund_t = save_fund_with_basic_temp(save_file, market='E')
+
 

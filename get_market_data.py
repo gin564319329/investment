@@ -96,7 +96,7 @@ class GetTuShareData:
         """增加净资产信息"""
         fund_append = fund_basic.copy()
         for row in fund_basic.itertuples():
-            print(row.Index, getattr(row, 'ts_code'))
+            print(row.Index, getattr(row, 'ts_code'), getattr(row, 'name'))
             time.sleep(0.8)
             fund_append.loc[row.Index, 'net_asset'], fund_append.loc[row.Index, 'ann_date'] = \
                 self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
