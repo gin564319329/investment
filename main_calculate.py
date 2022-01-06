@@ -4,6 +4,9 @@ from show_rst import ShowRst
 from advance_fun import AdvOperation
 import pandas as pd
 import logging
+import os
+import shutil
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.unicode.ambiguous_as_wide', True)
@@ -13,7 +16,7 @@ pd.set_option('display.width', 1)
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s',
                     datefmt='%d %b %Y, %H:%M',
-                    filename=r'.\run_fund.log',
+                    filename=r'rst_out/run_fund.log',
                     filemode='a')
 
 
@@ -102,10 +105,12 @@ if __name__ == '__main__':
     # save_file = r'.\rst_out\index_yield_rate_t.csv'
     # rst = save_index_ratio(date_s, index_name, save_file)
 
-    save_file = r'.\rst_out\fund_yield_rate_t1.csv'
-    save_file = r'rst_out\fund_basic_exchange_a.csv'
+    # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
+    save_file = r'rst_out\fund_basic_exchange_a1.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
-    rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type=None, market='E')
-    print(rst)
+    # rst = save_fund_with_ratio(date_s, save_file, code_list=code,  fund_type=None, market='E')
+    # print(rst)
 
-    fund_all = save_fund_with_basic(fund_type=['商品型', '另类投资型'], market='E')
+    fund_all = save_fund_with_basic(save_file, fund_type=['商品型', '另类投资型'], market='E')
+    # print(fund_all)
+
