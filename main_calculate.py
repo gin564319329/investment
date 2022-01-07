@@ -18,11 +18,12 @@ logging.basicConfig(level=logging.INFO,
                     filemode='a')
 
 
-def save_fund_with_basic(save_dir, date_query, date_sel='20210101', market='E', fund_type=None):
+def save_fund_with_basic(save_dir, date_query, date_sel='20210101', market='E', fund_type=None, input_file=None):
     get_data = GetCustomData()
     # fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
     # fund_basic = fund_basic[fund_basic['invest_type'].isnull()]
-    fund_basic = get_data.append_fund_basic(date_query, date_sel=date_sel, market=market, fund_type=fund_type)
+    fund_basic = get_data.append_fund_basic(date_query, date_sel=date_sel, market=market, fund_type=fund_type,
+                                            input_file=input_file)
     logging.info('{} fund number: {}'.format(market, fund_basic.shape[0]))
     fund_basic.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_basic
@@ -94,13 +95,14 @@ if __name__ == '__main__':
     # rst = save_index_ratio(date_q, index_name, save_file)
 
     # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
-    save_file = r'rst_out\fund_basic_exchange_total_a.csv'
-    # save_file = r'rst_out\fund_basic_open_all.csv'
+    # save_file = r'rst_out\fund_basic_exchange_total_a.csv'
+    save_file = r'rst_out\fund_basic_open_total_a.csv'
     # save_file = r'rst_out\fund_basic_exchange_all.csv'
-    # input_file = r'rst_out\fund_basic_exchange_commodity.csv'
+    i_file = r'rst_out\fund_basic_open_a.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
 
-    fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None)
+    fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None,
+                                    input_file=i_file)
 
 
 

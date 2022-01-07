@@ -43,8 +43,12 @@ class QueryTuShareData:
 
     def query_fund_nav(self, ts_code, start_date='', end_date=''):
         """获取公募基金净值数据 含场内与场外"""
-        nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'ann_date', 'net_asset'])
+        try:
+            nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
+            nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'ann_date', 'net_asset'])
+        except Exception as terror:
+            logging.error('-- Tushare System Error: {}'.format(terror))
+            nav_raw, nav_sel = pd.DataFrame(), pd.DataFrame()
         if nav_raw.empty:
             return nav_sel
         if nav_sel['net_asset'][0] is None:
@@ -164,27 +168,33 @@ class GetCustomData(QueryTuShareData):
 
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
-    def append_fund_basic(self, date_query, date_sel='20210101', market='E', fund_type=None):
+    def append_fund_basic(self, date_query, date_sel='20210101', market='E', fund_type=None, input_file=None):
         """增加净资产信息 增加基金年度收益率信息"""
-        fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
-        fund_b_sel = fund_basic[fund_basic['found_date'] < date_sel]
+        if not input_file:
+            fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
+        else:
+            fund_basic = pd.read_csv(input_file)
+        fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < date_sel]
         fund_b_sel.reset_index(drop=True, inplace=True)
         fund_append = fund_b_sel.copy()
         for index, row in fund_b_sel.iterrows():
+            time.sleep(0.7)
             fund_nav = self.query_fund_nav(row.get('ts_code'), start_date=date_query['date_start'][0])
+            if fund_nav.empty:
+                logging.warning('No.{} {} fail to query'.format(index, row.get('ts_code')))
+                continue
             print('---append {} {} {}'.format(index, row.get('ts_code'), row.get('name')))
             fund_append.at[index, 'net_asset'], fund_append.at[index, 'ann_date'] = \
                 self.op.get_newest_net_asset(fund_nav)
             for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
-                fund_nav_t = fund_nav[fund_nav['nav_date'] >= start]
-                fund_nav_sel = fund_nav_t[fund_nav_t['nav_date'] <= end]
+                fund_nav_t = fund_nav[fund_nav['nav_date'].astype('str') >= start]
+                fund_nav_sel = fund_nav_t[fund_nav_t['nav_date'].astype('str') <= end]
                 if fund_nav_sel.empty:
                     fund_append.at[index, per] = np.NAN
                     print('{} {} no data'.format(per, row.get('name')))
                     continue
                 fund_append.at[index, per] = self.op.cal_fund_change_ratio(fund_nav_sel)
                 print('{} {} fund yield rate: {:.2%}'.format(per, row.get('name'), fund_append.at[index, per]))
-            time.sleep(0.7)
 
         return fund_append
 
