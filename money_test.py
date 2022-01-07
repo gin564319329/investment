@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from advance_fun import AdvOperation
-from get_market_data import GetTuShareData
+from get_market_data import QueryTuShareData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 import time
@@ -13,7 +13,7 @@ import re
 import tushare as ts
 
 pd.set_option('display.max_columns', None)
-get_data = GetTuShareData()
+get_data = QueryTuShareData()
 
 index_code = '000300.SH'
 index_info = get_data.query_index_basic(index_code, '', market='SSE')

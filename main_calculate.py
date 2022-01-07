@@ -1,4 +1,4 @@
-from get_market_data import GetTuShareData
+from get_market_data import QueryTuShareData, GetCustomData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 from advance_fun import AdvOperation
@@ -18,52 +18,29 @@ logging.basicConfig(level=logging.INFO,
                     filemode='a')
 
 
-def save_fund_with_basic(save_dir, fund_type=None, market='E'):
-    get_data = GetTuShareData()
-    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
-    fund_basic = get_data.append_fund_basic(fund_basic)
+def save_fund_with_basic(save_dir, date_query, date_sel='20210101', market='E', fund_type=None):
+    get_data = GetCustomData()
+    # fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
+    # fund_basic = fund_basic[fund_basic['invest_type'].isnull()]
+    fund_basic = get_data.append_fund_basic(date_query, date_sel=date_sel, market=market, fund_type=fund_type)
     logging.info('{} fund number: {}'.format(market, fund_basic.shape[0]))
     fund_basic.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_basic
 
 
-def save_fund_with_basic_temp(save_dir, fund_type=None, market='E'):
-    get_data = GetTuShareData()
-    fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
-    fund_reit = fund_basic[fund_basic['invest_type'].isnull()]
-    fund_reit_a = get_data.append_fund_basic(fund_reit)
-    logging.info('{} fund number: {}'.format(market, fund_reit_a.shape[0]))
-    fund_reit_a.to_csv(save_dir, index=False, encoding='utf_8_sig')
-    return fund_reit_a
-
-
 def save_index_ratio(date_query, name_list, save_dir):
-    ad = AdvOperation()
-    code_rst = ad.get_index_tscode_by_name(name_list)
-    rst_con = ad.gen_index_yield(date_query, code_rst)
+    get_data = GetCustomData()
+    code_rst = get_data.get_index_tscode_by_name(name_list)
+    rst_con = get_data.gen_index_yield(date_query, code_rst)
     rst_con.to_csv(save_dir, index=True, encoding='utf_8_sig')
     return rst_con
 
 
-def save_fund_with_ratio(date_query, save_dir, code_list=(), input_dir='', market='E', fund_type=None):
-    if not input_dir:
-        fund_basic = GetTuShareData().query_fund_basic(market=market, fund_type=fund_type)
-    else:
-        fund_basic = pd.read_csv(input_dir)
-    if not code_list:
-        fund_sel = fund_basic.copy()
-    else:
-        fund_sel = fund_basic[fund_basic['ts_code'].isin(code_list)]
-    rst_con = AdvOperation().append_fund_yield(date_query, fund_sel)
-    rst_con.to_csv(save_dir, index=False, encoding='utf_8_sig')
-    return rst_con
-
-
 def cal_invest_yield(ts_code, date_start, date_end):
+    get_data = GetCustomData()
     weekday = 4
     m_day = 20
-    tu_data = GetTuShareData().query_index_daily(ts_code, date_start, date_end)
-    cal_data_tu = GetTuShareData().gen_cal_data(tu_data)
+    cal_data_tu = get_data.get_index_daily_data(ts_code, date_start, date_end)
 
     fit = CalFixedInvest(cal_data_tu, money_amount=500)
     fit_m = CalFixedInvest(cal_data_tu, money_amount=2000)
@@ -98,36 +75,32 @@ def cal_invest_yield(ts_code, date_start, date_end):
 
 
 if __name__ == '__main__':
-    # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
 
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
-    # index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
-    # date_s = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-    #                          '20181228', '20191231', '20201231', '20111230'],
-    #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-    #                        '20191231', '20201231', '20211231', '20211231'],
-    #           'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', 'all']}
-    index_name = ['上证指数', '沪深300', '中证500']
-    date_s = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
-              'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
-              'query_period': ['2018', '2019', '2020', '2021', 'all']}
-    # save_file = r'.\rst_out\index_yield_rate_t.csv'
-    # rst = save_index_ratio(date_s, index_name, save_file)
+    # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
+    index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
+    date_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
+                             '20181228', '20191231', '20201231', '20111230'],
+              'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
+                           '20191231', '20201231', '20211231', '20211231'],
+              'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', 'all']}
+    # index_name = ['上证指数', '沪深300', '中证500']
+    # date_q = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20171229'],
+    #           'date_end': ['20181231', '20191231', '20201231', '20211231', '20211231'],
+    #           'query_period': ['2018', '2019', '2020', '2021', 'all']}
+    # save_file = r'.\rst_out\index_yield_rate_tt.csv'
+    # rst = save_index_ratio(date_q, index_name, save_file)
 
     # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
-    # save_file = r'rst_out\fund_basic_exchange_commodity_rate.csv'
-    save_file = r'rst_out\fund_basic_open_all.csv'
+    save_file = r'rst_out\fund_basic_exchange_total_a.csv'
+    # save_file = r'rst_out\fund_basic_open_all.csv'
     # save_file = r'rst_out\fund_basic_exchange_all.csv'
     # input_file = r'rst_out\fund_basic_exchange_commodity.csv'
     code = ('159934.SZ', '518880.SH', '518800.SH')
-    # rst = save_fund_with_ratio(date_s, save_file, code_list=(), input_dir=input_file, market='E', fund_type=None)
-    # print(rst)
 
-    fund_all = save_fund_with_basic(save_file, fund_type=None, market='O')
+    fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None)
 
-    # save_file = r'rst_out\fund_basic_exchange_reit.csv'
-    # fund_t = save_fund_with_basic_temp(save_file, market='E')
 
 

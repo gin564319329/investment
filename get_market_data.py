@@ -3,9 +3,11 @@ import pandas as pd
 import tushare as ts
 from datetime import datetime, timedelta
 import logging
+import numpy as np
+from advance_fun import AdvOperation
 
 
-class GetTuShareData:
+class QueryTuShareData:
 
     def __init__(self):
         ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
@@ -42,7 +44,7 @@ class GetTuShareData:
     def query_fund_nav(self, ts_code, start_date='', end_date=''):
         """获取公募基金净值数据 含场内与场外"""
         nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'net_asset'])
+        nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'ann_date', 'net_asset'])
         if nav_raw.empty:
             return nav_sel
         if nav_sel['net_asset'][0] is None:
@@ -86,26 +88,42 @@ class GetTuShareData:
             stock_bat.at[i, 'st_name'] = self.query_stock_name(getattr(row, 'st_code'))
         return stock_bat
 
-    def search_net_asset(self, ts_code, start_date=''):
-        nav = self.query_fund_nav(ts_code, start_date=start_date)
-        if not nav['net_asset'].notnull().sum():
-            return None, None
-        return nav['net_asset'][nav['net_asset'].notnull()].iloc[0], nav['nav_date'][nav['net_asset'].notnull()].iloc[0]
-
-    def append_fund_basic(self, fund_basic, start_date=''):
-        """增加净资产信息"""
-        fund_append = fund_basic.copy()
-        for row in fund_basic.itertuples():
-            print(row.Index, getattr(row, 'ts_code'), getattr(row, 'name'))
-            time.sleep(0.8)
-            fund_append.loc[row.Index, 'net_asset'], fund_append.loc[row.Index, 'ann_date'] = \
-                self.search_net_asset(getattr(row, 'ts_code'), start_date=start_date)
-        return fund_append
-
     def append_fund_portfolio_name(self, ts_code, end_date):
         portfolio = self.query_fund_portfolio(ts_code, end_date)
         folio = self.query_stock_name_batch(portfolio['symbol'])
         return pd.concat([portfolio, folio['st_name']], axis=1)
+
+
+class GetCustomData(QueryTuShareData):
+
+    def __init__(self):
+        super(GetCustomData, self).__init__()
+        self.op = AdvOperation()
+
+    def get_index_daily_data(self, ts_code, date_start, date_end):
+        tu_data = self.query_index_daily(ts_code, date_start, date_end)
+        index_for_cal = self.gen_cal_data(tu_data)
+        return index_for_cal
+
+    def get_index_tscode_by_name(self, search_list):
+        df_sh = self.query_index_basic('', '', market='SSE')
+        df_sz = self.query_index_basic('', '', market='SZSE')
+        ts_dict = {'ts_code': [], 'name': []}
+
+        for index, s in df_sh.iterrows():
+            if s['name'] in search_list:
+                search_list.remove(s['name'])
+                print('{}\t代码:\t {}'.format(s['name'], s['ts_code']))
+                ts_dict['ts_code'].append(s['ts_code'])
+                ts_dict['name'].append(s['name'])
+
+        for index, s in df_sz.iterrows():
+            if s['name'] in search_list:
+                search_list.remove(s['name'])
+                print('{}\t代码:\t {}'.format(s['name'], s['ts_code']))
+                ts_dict['ts_code'].append(s['ts_code'])
+                ts_dict['name'].append(s['name'])
+        return ts_dict
 
     @staticmethod
     def gen_cal_data(raw_data):
@@ -126,3 +144,55 @@ class GetTuShareData:
         cal_data['weekday'] = weekday_list
         cal_data['price'] = raw_data['close']
         return cal_data
+
+    def gen_index_yield(self, date_query, index_query):
+        """生成指数年度收益率表格"""
+        index_yield = pd.DataFrame(index=date_query['query_period'])
+        for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
+            for code, name in zip(index_query.get('ts_code'), index_query.get('name')):
+                index_for_cal = self.get_index_daily_data(code, start, end)
+                ch_ratio = self.op.cal_index_change_ratio(index_for_cal)
+                in_ratio = self.op.cal_fixed_inv_change_ratio(index_for_cal)
+                index_yield.at[per, '{}_涨幅'.format(name)] = ch_ratio
+                index_yield.at[per, '{}_定投'.format(name)] = in_ratio
+                print('{} {} change ratio: {:.2%}'.format(per, name, ch_ratio))
+                print('{} {} irri profit: {:.2%}'.format(per, name, in_ratio))
+        ch_df = index_yield[[a for a in index_yield.columns if '涨幅' in a]]
+        in_df = index_yield[[a for a in index_yield.columns if '定投' in a]]
+        ch_df_a = self.op.cal_index_minmax(ch_df, '涨幅')
+        in_df_a = self.op.cal_index_minmax(in_df, '定投')
+
+        return pd.concat([ch_df_a, in_df_a], axis=1)
+
+    def append_fund_basic(self, date_query, date_sel='20210101', market='E', fund_type=None):
+        """增加净资产信息 增加基金年度收益率信息"""
+        fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
+        fund_b_sel = fund_basic[fund_basic['found_date'] < date_sel]
+        fund_b_sel.reset_index(drop=True, inplace=True)
+        fund_append = fund_b_sel.copy()
+        for index, row in fund_b_sel.iterrows():
+            fund_nav = self.query_fund_nav(row.get('ts_code'), start_date=date_query['date_start'][0])
+            print('---append {} {} {}'.format(index, row.get('ts_code'), row.get('name')))
+            fund_append.at[index, 'net_asset'], fund_append.at[index, 'ann_date'] = \
+                self.op.get_newest_net_asset(fund_nav)
+            for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
+                fund_nav_t = fund_nav[fund_nav['nav_date'] >= start]
+                fund_nav_sel = fund_nav_t[fund_nav_t['nav_date'] <= end]
+                if fund_nav_sel.empty:
+                    fund_append.at[index, per] = np.NAN
+                    print('{} {} no data'.format(per, row.get('name')))
+                    continue
+                fund_append.at[index, per] = self.op.cal_fund_change_ratio(fund_nav_sel)
+                print('{} {} fund yield rate: {:.2%}'.format(per, row.get('name'), fund_append.at[index, per]))
+            time.sleep(0.7)
+
+        return fund_append
+
+
+if __name__ == '__main__':
+    cus_data = GetCustomData()
+    index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
+    ch_r = cus_data.op.cal_index_change_ratio(index_data)
+    in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
+    print('change rate: {:.2%}'.format(ch_r))
+    print('irri rate: {:.2%}'.format(in_r))
