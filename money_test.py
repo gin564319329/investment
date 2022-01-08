@@ -19,14 +19,14 @@ pro = ts.pro_api()
 # pro.fund_basic(market='E', status='L')
 # pro.fund_nav(ts_code='450009.OF')
 # pro.fund_share(ts_code='161005.SZ')
-# pro.fund_portfolio(ts_code='450009.OF', ann_date='', start_date='20210930', end_date='20220101')
+s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630', end_date='20220101')  # 167508.SZ 450009.OF
 # pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
 # stock_total = pro.stock_basic(ts_code='')
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
 # stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
 
 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 
 get_data = GetCustomData()
 in_f = r'rst_out\stock_total.csv'

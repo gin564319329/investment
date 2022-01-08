@@ -80,35 +80,9 @@ class QueryTuShareData:
         logging.warning('there is no {} fund'.format(code))
         return None
 
-    def query_stock_name(self, ts_code):
+    def query_stock_name(self, ts_code=''):
         """根据代码查询股票名称"""
-        try:
-            stock_name = self.pro.stock_basic(ts_code=ts_code)['name'][0]
-        except Exception as terror:
-            logging.error('-- Query Stock Name Error: {}'.format(terror))
-            stock_name = None
-        return stock_name
-
-    def query_stock_name_all(self, ts_code=''):
-        """根据代码查询股票列表"""
         return self.pro.stock_basic(ts_code=ts_code)
-
-    def query_stock_name_batch(self, ts_code_bat, input_file=''):
-        """根据代码批量查询股票名称"""
-        if not input_file:
-            stock_db = self.query_stock_name_all()
-        else:
-            stock_db = pd.read_csv(input_file)
-        stock_df = pd.DataFrame(ts_code_bat.values, columns=['stock_code'])
-        stock_bat = stock_df.copy()
-        for i, row in stock_df.iterrows():
-            stock_bat.at[i, 'stock_name'] = stock_db[stock_db['ts_code'] == row.get('stock_code')].get('name')
-        return stock_bat
-
-    def append_fund_portfolio_name(self, ts_code, start_date, end_date, input_file=''):
-        portfolio = self.query_fund_portfolio(ts_code, start_date=start_date, end_date=end_date)
-        folio = self.query_stock_name_batch(portfolio['symbol'], input_file=input_file)
-        return pd.concat([portfolio, folio['stock_name']], axis=1)
 
 
 class GetCustomData(QueryTuShareData):
@@ -214,6 +188,23 @@ class GetCustomData(QueryTuShareData):
                 print('{} {} fund yield rate: {:.2%}'.format(per, row.get('name'), fund_append.at[index, per]))
 
         return fund_append
+
+    def append_fund_portfolio_name(self, ts_code, start_date, end_date, input_file=''):
+        """根据代码批量查询并append基金持仓股票名称"""
+        portfolio = self.query_fund_portfolio(ts_code, start_date=start_date, end_date=end_date)
+        if not input_file:
+            stock_db = self.query_stock_name()
+        else:
+            stock_db = pd.read_csv(input_file)
+        stock_bat = portfolio.copy()
+        for i, row in portfolio.iterrows():
+            stock_name = stock_db[stock_db['ts_code'] == row.get('symbol')].get('name')
+            if stock_name.empty:
+                print('fail to query {} name'.format(row.get('symbol')))
+                stock_bat.at[i, 'stock_name'] = None
+                continue
+            stock_bat.at[i, 'stock_name'] = stock_name.iloc[0]
+        return stock_bat.drop(['ann_date'], axis=1)
 
 
 if __name__ == '__main__':
