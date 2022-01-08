@@ -67,9 +67,9 @@ class QueryTuShareData:
         fund_share['fd_share'] = share_y.round(decimals=2)
         return fund_share.get(['ts_code', 'trade_date', 'fd_share'])
 
-    def query_fund_portfolio(self, ts_code, end_date):
+    def query_fund_portfolio(self, ts_code, start_date='', end_date=''):
         """获取公募基金持仓数据，季度更新 end_date 季报日期"""
-        return self.pro.fund_portfolio(ts_code=ts_code, end_date=end_date)
+        return self.pro.fund_portfolio(ts_code=ts_code, start_date=start_date, end_date=end_date)
 
     def query_ts_code_by_code(self, code, market='E'):
         """查询tushare基金代码"""
@@ -82,20 +82,33 @@ class QueryTuShareData:
 
     def query_stock_name(self, ts_code):
         """根据代码查询股票名称"""
-        return self.pro.stock_basic(ts_code=ts_code)['name'][0]
+        try:
+            stock_name = self.pro.stock_basic(ts_code=ts_code)['name'][0]
+        except Exception as terror:
+            logging.error('-- Query Stock Name Error: {}'.format(terror))
+            stock_name = None
+        return stock_name
 
-    def query_stock_name_batch(self, ts_code_bat):
+    def query_stock_name_all(self, ts_code=''):
+        """根据代码查询股票列表"""
+        return self.pro.stock_basic(ts_code=ts_code)
+
+    def query_stock_name_batch(self, ts_code_bat, input_file=''):
         """根据代码批量查询股票名称"""
-        stock_df = pd.DataFrame(ts_code_bat.values, columns=['st_code'])
+        if not input_file:
+            stock_db = self.query_stock_name_all()
+        else:
+            stock_db = pd.read_csv(input_file)
+        stock_df = pd.DataFrame(ts_code_bat.values, columns=['stock_code'])
         stock_bat = stock_df.copy()
         for i, row in stock_df.iterrows():
-            stock_bat.at[i, 'st_name'] = self.query_stock_name(getattr(row, 'st_code'))
+            stock_bat.at[i, 'stock_name'] = stock_db[stock_db['ts_code'] == row.get('stock_code')].get('name')
         return stock_bat
 
-    def append_fund_portfolio_name(self, ts_code, end_date):
-        portfolio = self.query_fund_portfolio(ts_code, end_date)
-        folio = self.query_stock_name_batch(portfolio['symbol'])
-        return pd.concat([portfolio, folio['st_name']], axis=1)
+    def append_fund_portfolio_name(self, ts_code, start_date, end_date, input_file=''):
+        portfolio = self.query_fund_portfolio(ts_code, start_date=start_date, end_date=end_date)
+        folio = self.query_stock_name_batch(portfolio['symbol'], input_file=input_file)
+        return pd.concat([portfolio, folio['stock_name']], axis=1)
 
 
 class GetCustomData(QueryTuShareData):
@@ -174,14 +187,18 @@ class GetCustomData(QueryTuShareData):
             fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
         else:
             fund_basic = pd.read_csv(input_file)
+            # fund_basic = fund_basic.loc[4420:4540]
         fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < date_sel]
-        fund_b_sel.reset_index(drop=True, inplace=True)
+        # fund_b_sel.reset_index(drop=True, inplace=True)
         fund_append = fund_b_sel.copy()
         for index, row in fund_b_sel.iterrows():
-            time.sleep(0.7)
+            time.sleep(0.65)
             fund_nav = self.query_fund_nav(row.get('ts_code'), start_date=date_query['date_start'][0])
+            if fund_nav is None:
+                logging.warning('No.{} {} fail to query: is None'.format(index, row.get('ts_code')))
+                continue
             if fund_nav.empty:
-                logging.warning('No.{} {} fail to query'.format(index, row.get('ts_code')))
+                logging.warning('No.{} {} fail to query: is empty'.format(index, row.get('ts_code')))
                 continue
             print('---append {} {} {}'.format(index, row.get('ts_code'), row.get('name')))
             fund_append.at[index, 'net_asset'], fund_append.at[index, 'ann_date'] = \
