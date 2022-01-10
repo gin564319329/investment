@@ -28,10 +28,6 @@ s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630', 
 
 pd.set_option('display.max_columns', None)
 
-get_data = GetCustomData()
-in_f = r'rst_out\stock_total.csv'
-fio1 = get_data.append_fund_portfolio_name('167508.SZ', start_date='20210630', end_date='20220101', input_file=in_f)
-fio1.to_csv(r'rst_out\fio2.csv', index=False, encoding='utf_8_sig')
 
 # index_code = '000300.SH'
 # index_info = get_data.query_index_basic(index_code, '', market='SSE')

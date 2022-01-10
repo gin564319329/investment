@@ -1,7 +1,7 @@
 from get_market_data import QueryTuShareData, GetCustomData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
-from advance_fun import AdvOperation
+import time
 import pandas as pd
 import logging
 
@@ -27,6 +27,26 @@ def save_fund_with_basic(save_dir, date_query, date_sel='20210101', market='E', 
     logging.info('{} fund number: {}'.format(market, fund_basic.shape[0]))
     fund_basic.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_basic
+
+
+def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio_file=''):
+    """根据基金basic总表，循环查询append portfolio"""
+    portfolio_total = pd.DataFrame()
+    get_data = GetCustomData()
+    if not basic_file:
+        fund_basic = get_data.query_fund_basic(market='E', fund_type=['股票型', '混合型'])
+    else:
+        fund_basic = pd.read_csv(basic_file)
+        fund_basic = fund_basic[fund_basic['fund_type'].isin(['股票型', '混合型'])]
+    for i, row in fund_basic.iterrows():
+        print('start query: {} {} portfolio data'.format(i, row.get('ts_code')))
+        time.sleep(0.9)
+        fio = get_data.append_fund_portfolio_name(row.get('ts_code'), start_date, end_date, portfolio_file)
+        portfolio_total = portfolio_total.append(fio, ignore_index=True)
+        if fio.empty:
+            print('No {} portfolio data'.format(row.get('ts_code')))
+    portfolio_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return portfolio_total
 
 
 def save_index_ratio(date_query, name_list, save_dir):
@@ -96,13 +116,20 @@ if __name__ == '__main__':
 
     # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
     # save_file = r'rst_out\fund_basic_exchange_total_a.csv'
-    save_file = r'rst_out\fund_basic_open_total_a.csv'
+    # save_file = r'rst_out\fund_basic_open_total_a.csv'
+    save_file = r'rst_out\fio_open.csv'
     # save_file = r'rst_out\fund_basic_exchange_all.csv'
-    i_file = r'rst_out\fund_basic_open_a.csv'
-    code = ('159934.SZ', '518880.SH', '518800.SH')
+    # i_file = r'rst_out\fund_basic_open_a.csv'
+    i_file = r'rst_out\stock_total.csv'
+    # code = ('159934.SZ', '518880.SH', '518800.SH')
+    code, start, end = '167508.SZ', '20210930', '20220101'
+    b_file = r'rst_out\fund_basic_open_a.csv'
 
-    fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None,
-                                    input_file=i_file)
+    # fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None,
+    #                                 input_file=i_file)
+
+    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_file)
+
 
 
 
