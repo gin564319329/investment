@@ -217,6 +217,20 @@ class GetCustomData(QueryTuShareData):
         stock_bat['amount'] = stock_bat['amount']/1e4
         return stock_bat.drop(['ann_date', 'stk_mkv_ratio'], axis=1)
 
+    @staticmethod
+    def append_portfolio_offline(portfolio_file='', fund_file=''):
+        portfolio = pd.read_csv(portfolio_file)
+        fund_db = pd.read_csv(fund_file)
+        port_a = portfolio.copy()
+        for i, row in portfolio.iterrows():
+            fund_name = fund_db[fund_db['ts_code'] == row.get('ts_code')].get('name')
+            try:
+                port_a.at[i, 'fund_name'] = fund_name.iloc[0]
+            except Exception as trr:
+                print(' fail to append {} {} name: {}'.format(i, row.get('ts_code'), trr))
+                port_a.at[i, 'fund_name'] = None
+        return port_a
+
 
 if __name__ == '__main__':
     cus_data = GetCustomData()
