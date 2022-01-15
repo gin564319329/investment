@@ -15,7 +15,7 @@ class ShowRst:
         set_plot_style()
 
     @staticmethod
-    def gen_fig():
+    def gen_one_ax():
         fig = plt.figure()
         ax = fig.add_subplot(111)
         return ax
@@ -37,6 +37,18 @@ class ShowRst:
     @staticmethod
     def show_average_principal(ax1, pri_average):
         ax1.axhline(y=pri_average, ls='--', c='g')
+
+    @staticmethod
+    def show_fund_major_stocks(sc_df):
+        plt.figure()
+        plt.bar(sc_df['stock_name'], sc_df['hold_num'])
+        plt.ylabel('持仓基金数目')
+        plt.title('偏股型公募基金重仓股统计')
+        plt.xticks(rotation=-45)
+        plt.show()
+
+
+
 
 
 

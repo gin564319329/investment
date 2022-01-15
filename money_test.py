@@ -16,6 +16,8 @@ import tushare as ts
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
 pro = ts.pro_api()
@@ -30,8 +32,6 @@ s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630', 
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
 # stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
 
-
-pd.set_option('display.max_columns', None)
 get_data = GetCustomData()
 
 # index_code = '000300.SH'
@@ -50,35 +50,11 @@ get_data = GetCustomData()
 # fund_manager = get_data.query_fund_manager('167508.SZ')
 # share = get_data.query_fund_share('167508.SZ')
 
-fund_file = r'rst_out\fund_basic_exchange_raw.csv'
-portfolio_file = r'rst_out\fio_exchange.csv'
-port_e = get_data.append_portfolio_offline(portfolio_file, fund_file)
-# port_e.to_csv(r'rst_out\fio_append_f2.csv', index=False, encoding='utf_8_sig')
-s_count = port_e['stock_name'].value_counts()
-s_c_e = s_count[0:50]
-plt.figure()
-x = s_c_e.index.tolist()
-plt.bar(x, s_c_e.values)
-plt.xticks(rotation=-45)
 
-fund_file = r'rst_out\fund_basic_open_raw.csv'
-portfolio_file = r'rst_out\fio_open.csv'
-port_o = get_data.append_portfolio_offline(portfolio_file, fund_file)
+fo = pd.read_csv(r'rst_out\fio_open.csv')
+fe = pd.read_csv(r'rst_out\fio_exchange.csv')
+fa = pd.concat([fo, fe], axis=0, ignore_index=True)
+fa.to_csv(r'rst_out\fio_all.csv', index=False, encoding='utf_8_sig')
 
-s_count = port_o['stock_name'].value_counts()
-s_c_o = s_count[0:50]
-plt.figure()
-x = s_c_o.index.tolist()
-plt.bar(x, s_c_o.values)
-plt.xticks(rotation=-45)
 
-sca = []
-dif = []
-for i in s_c_o.index:
-    if i in s_c_e:
-        sca.append(i)
-    else:
-        dif.append(i)
-f = plt.figure(3)
-plt.bar(sca, np.ones(len(sca)))
-plt.xticks(rotation=-45)
+

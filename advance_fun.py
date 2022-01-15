@@ -1,3 +1,5 @@
+import pandas as pd
+
 from fund_tools import CalFixedInvest, CalYieldRate
 
 
@@ -39,4 +41,24 @@ class AdvOperation:
         yield_con['最优{}'.format(key)] = yield_df.idxmax(axis=1).values
         yield_con['最差{}'.format(key)] = yield_df.idxmin(axis=1).values
         return yield_con
+
+    @staticmethod
+    def count_fund_major_stocks(portfolio_dir=r'final_data\fio_exchange.csv', save_dir=''):
+        port_o = pd.read_csv(portfolio_dir)
+        s_count = port_o['stock_name'].value_counts()
+        s_c = s_count[s_count.values > 4]
+        s_c_dict = {'stock_name': s_c.index.tolist(), 'hold_num': s_c.tolist()}
+        s_c_df = pd.DataFrame.from_dict(s_c_dict)
+        if save_dir:
+            s_c_df.to_csv(save_dir, index=False, encoding='utf_8_sig')
+        return s_c_df
+
+
+if __name__ == '__main__':
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    op = AdvOperation()
+    sco = op.count_fund_major_stocks(portfolio_dir=r'final_data\fio_all.csv', save_dir=r'rst_out\fio_count_o.csv')
+    print(sco)
+
 

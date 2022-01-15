@@ -234,8 +234,14 @@ class GetCustomData(QueryTuShareData):
 
 if __name__ == '__main__':
     cus_data = GetCustomData()
+
     index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
     ch_r = cus_data.op.cal_index_change_ratio(index_data)
     in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
     print('change rate: {:.2%}'.format(ch_r))
     print('irri rate: {:.2%}'.format(in_r))
+
+    fund_b = r'rst_out\fund_basic_exchange_raw.csv'
+    portfolio_raw = r'rst_out\fio_exchange.csv'
+    port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
+    # port_e.to_csv(r'rst_out\fio_append_f2.csv', index=False, encoding='utf_8_sig')

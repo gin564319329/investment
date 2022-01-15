@@ -1,5 +1,6 @@
 from get_market_data import QueryTuShareData, GetCustomData
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
+from advance_fun import AdvOperation
 from show_rst import ShowRst
 import time
 import pandas as pd
@@ -90,9 +91,17 @@ def cal_invest_yield(ts_code, date_start, date_end):
     rate_m_irr = yr.cal_irr_by_fixed_invest(val_arr_m, 12)
 
     show_r = ShowRst()
-    ax = show_r.gen_fig()
+    ax = show_r.gen_one_ax()
     show_r.show_cumulative_value(ax, cal_data_tu, df_invest_data_w)
     show_r.show_average_principal(ax, pri_average_w)
+
+
+def analysis_fund_fio(portfolio_dir=r'final_data\fio_all.csv'):
+    op = AdvOperation()
+    sco = op.count_fund_major_stocks(portfolio_dir=portfolio_dir)
+    sco_c = sco.iloc[200:250]
+    show_r = ShowRst()
+    show_r.show_fund_major_stocks(sco_c)
 
 
 if __name__ == '__main__':
@@ -128,7 +137,9 @@ if __name__ == '__main__':
     # fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None,
     #                                 input_file=i_file)
 
-    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_file)
+    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_file)
+
+    analysis_fund_fio()
 
 
 
