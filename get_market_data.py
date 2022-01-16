@@ -156,7 +156,8 @@ class GetCustomData(QueryTuShareData):
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
     def append_fund_basic(self, date_query, date_sel='20210101', market='E', fund_type=None, input_file=None):
-        """增加净资产信息 增加基金年度收益率信息"""
+        """增加净资产信息 net_asset 亿元
+        增加基金年度收益率信息"""
         if not input_file:
             fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
         else:
