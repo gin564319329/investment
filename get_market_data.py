@@ -71,10 +71,11 @@ class QueryTuShareData:
         """获取公募基金持仓数据，季度更新 end_date 季报日期"""
         return self.pro.fund_portfolio(ts_code=ts_code, start_date=start_date, end_date=end_date)
 
-    def query_ts_code_by_code(self, code, market='E'):
+    def query_ts_code_by_code(self, code, market='E', fund_db=None):
         """查询tushare基金代码"""
-        fund_bat = self.query_fund_basic(market=market, status='L')
-        for ts_code in fund_bat['ts_code']:
+        if fund_db is None:
+            fund_db = self.query_fund_basic(market=market, status='L')
+        for ts_code in fund_db['ts_code']:
             if code in ts_code:
                 return ts_code
         logging.warning('there is no {} fund'.format(code))

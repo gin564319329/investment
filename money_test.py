@@ -12,7 +12,6 @@ from bs4 import BeautifulSoup
 import re
 import tushare as ts
 
-
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
@@ -26,7 +25,8 @@ pro = ts.pro_api()
 # f.to_csv(r'rst_out\fund_open_raw.csv', index=False, encoding='utf_8_sig')
 # pro.fund_nav(ts_code='450009.OF')
 # pro.fund_share(ts_code='161005.SZ')
-s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630', end_date='20220101')  # 167508.SZ 450009.OF
+s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630',
+                       end_date='20220101')  # 167508.SZ 450009.OF
 # pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
 # stock_total = pro.stock_basic(ts_code='')
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
@@ -59,11 +59,15 @@ fa.to_csv(r'rst_out\fio_all.csv', index=False, encoding='utf_8_sig')
 fdo = pd.read_csv(r'rst_out\fund_basic_open_total_a.csv')
 fdo1 = fdo[fdo['fund_type'].isin(['股票型', '混合型'])]
 fdo2 = fdo1[fdo1['2017'].notna()]
-fdo3 = fdo2[fdo2['net_asset']<80]
+fdo3 = fdo2[fdo2['net_asset'] < 80]
 fdo4 = fdo2[fdo2['2021'] >= 0]
 fdo5 = fdo4[fdo4['2020'] >= fdo2['2020'].median()]
 fdo5 = fdo5[fdo5['2019'] >= fdo2['2019'].median()]
 fdo5 = fdo5[fdo5['2018'] >= fdo2['2018'].median()]
 fdo6 = fdo5.sort_values(by=['2021'], ascending=False)
-fdo7 = fdo6[fdo6['net_asset']<80]
+fdo7 = fdo6[fdo6['net_asset'] < 80]
+
+fdo7.to_csv(r'rst_out\fund_sel.csv', index=False, encoding='utf_8_sig')
+
+fdo = pd.read_excel(r'rst_out\fund_self.xlsx', dtype={'code': str})
 
