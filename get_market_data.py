@@ -4,6 +4,7 @@ import tushare as ts
 from datetime import datetime, timedelta
 import logging
 import numpy as np
+import os
 from advance_fun import AdvOperation
 
 
@@ -45,7 +46,7 @@ class QueryTuShareData:
         """获取公募基金净值数据 含场内与场外"""
         try:
             nav_raw = self.pro.fund_nav(ts_code=ts_code, start_date=start_date, end_date=end_date)
-            nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'ann_date', 'net_asset'])
+            nav_sel = nav_raw.get(['ts_code', 'nav_date', 'unit_nav', 'accum_nav', 'adj_nav', 'net_asset'])
         except Exception as terror:
             logging.error('-- Tushare System Error: {}'.format(terror))
             nav_raw, nav_sel = pd.DataFrame(), pd.DataFrame()
@@ -156,20 +157,18 @@ class GetCustomData(QueryTuShareData):
 
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
-    def append_fund_basic(self, date_query, date_sel='20210101', market='E', fund_type=None, input_file=None):
-        """增加规模信息 net_asset 亿元
-        增加基金年度收益率信息"""
-        if not input_file:
+    def append_fund_basic(self, period_query, found_date_sel='20220101', market='E', fund_type=None, fund_basic=None):
+        """增加fund_basic 规模信息 net_asset 亿元 基金年度收益率信息 基金经理"""
+        if fund_basic is None:
             fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
-        else:
-            fund_basic = pd.read_csv(input_file)
-            # fund_basic = fund_basic.loc[4420:4540]
-        fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < date_sel]
+        fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < found_date_sel]
         # fund_b_sel.reset_index(drop=True, inplace=True)
         fund_append = fund_b_sel.copy()
         for index, row in fund_b_sel.iterrows():
+            manager = self.query_fund_manager(row.get('ts_code'))
+            fund_append.at[index, 'manager'] = ' '.join(manager[manager['end_date'].isnull()].get('name').tolist())
             time.sleep(0.65)
-            fund_nav = self.query_fund_nav(row.get('ts_code'), start_date=date_query['date_start'][0])
+            fund_nav = self.query_fund_nav(row.get('ts_code'), start_date=period_query['date_start'][0])
             if fund_nav is None:
                 logging.warning('No.{} {} fail to query: is None'.format(index, row.get('ts_code')))
                 continue
@@ -179,7 +178,7 @@ class GetCustomData(QueryTuShareData):
             print('---append {} {} {}'.format(index, row.get('ts_code'), row.get('name')))
             fund_append.at[index, 'net_asset'], fund_append.at[index, 'ann_date'] = \
                 self.op.get_newest_net_asset(fund_nav)
-            for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
+            for start, end, per in zip(period_query['date_start'], period_query['date_end'], period_query['query_period']):
                 fund_nav_t = fund_nav[fund_nav['nav_date'].astype('str') >= start]
                 fund_nav_sel = fund_nav_t[fund_nav_t['nav_date'].astype('str') <= end]
                 if fund_nav_sel.empty:
@@ -233,17 +232,48 @@ class GetCustomData(QueryTuShareData):
                 port_a.at[i, 'fund_name'] = None
         return port_a
 
+    def self_fund_pro(self, my_fund, query_basic=None):
+        """process my self fund: append fund manager, net asset info..."""
+        if query_basic is None:
+            fund_e = self.query_fund_basic(market='E')
+            fund_o = self.query_fund_basic(market='O')
+            query_basic = pd.concat([fund_e, fund_o], axis=0)
+        my_fund_a = pd.DataFrame(columns=query_basic.columns)
+        for i, row in my_fund.iterrows():
+            ts_code = self.query_ts_code_by_code(row.get('code'), fund_db=query_basic)
+            my_fund_a.loc[i, :] = query_basic[query_basic['ts_code'] == ts_code].values
+        return my_fund_a
+
+
+class SaveQueryDB(QueryTuShareData):
+
+    def __init__(self, save_dir):
+        super(SaveQueryDB, self).__init__()
+        self.op = AdvOperation()
+        self.save_dir = save_dir
+
+    def save_fund_basic_raw(self):
+        """save fund basic info list: exchange and open """
+        fund_e = self.query_fund_basic(market='E')
+        fund_o = self.query_fund_basic(market='O')
+        fund_eo = pd.concat([fund_e, fund_o], axis=0)
+        save_file = os.path.join(self.save_dir, 'query_fund_basic.csv')
+        fund_eo.to_csv(save_file, index=False, encoding='utf_8_sig')
+
 
 if __name__ == '__main__':
     cus_data = GetCustomData()
+    query_db = SaveQueryDB('rst_out')
 
-    index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
-    ch_r = cus_data.op.cal_index_change_ratio(index_data)
-    in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
-    print('change rate: {:.2%}'.format(ch_r))
-    print('irri rate: {:.2%}'.format(in_r))
-
-    fund_b = r'rst_out\fund_basic_exchange_raw.csv'
-    portfolio_raw = r'rst_out\fio_exchange.csv'
-    port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
+    # index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
+    # ch_r = cus_data.op.cal_index_change_ratio(index_data)
+    # in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
+    # print('change rate: {:.2%}'.format(ch_r))
+    # print('irri rate: {:.2%}'.format(in_r))
+    #
+    # fund_b = r'rst_out\fund_basic_exchange_raw.csv'
+    # portfolio_raw = r'rst_out\fio_exchange.csv'
+    # port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
     # port_e.to_csv(r'rst_out\fio_append_f2.csv', index=False, encoding='utf_8_sig')
+
+    query_db.save_fund_basic_raw()

@@ -1,4 +1,4 @@
-from get_market_data import QueryTuShareData, GetCustomData
+from get_market_data import QueryTuShareData, GetCustomData, SaveQueryDB
 from fund_tools import CalFixedInvest, CalYieldRate, CalTime
 from advance_fun import AdvOperation
 from show_rst import ShowRst
@@ -6,30 +6,30 @@ import time
 import pandas as pd
 import logging
 
-
 pd.set_option('display.max_columns', None)
 pd.set_option('display.unicode.ambiguous_as_wide', True)
 pd.set_option('display.unicode.east_asian_width', True)
 pd.set_option('display.width', 1)
-# logging.basicConfig(level=logging.INFO)
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(message)s',
-                    datefmt='%d %b %Y, %H:%M',
-                    filename=r'rst_out/run_fund.log',
-                    filemode='a')
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO,
+#                     format='%(asctime)s %(message)s',
+#                     datefmt='%d %b %Y, %H:%M',
+#                     filename=r'rst_out/run_fund.log',
+#                     filemode='a')
 
-db = QueryTuShareData()
 get_data = GetCustomData()
 
 
-def save_fund_with_basic(save_dir, date_query, date_sel='20210101', market='E', fund_type=None, input_file=None):
-    # fund_basic = get_data.query_fund_basic(market=market, fund_type=fund_type)
-    # fund_basic = fund_basic[fund_basic['invest_type'].isnull()]
-    fund_basic = get_data.append_fund_basic(date_query, date_sel=date_sel, market=market, fund_type=fund_type,
-                                            input_file=input_file)
-    logging.info('{} fund number: {}'.format(market, fund_basic.shape[0]))
-    fund_basic.to_csv(save_dir, index=False, encoding='utf_8_sig')
-    return fund_basic
+def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210101', market='E', fund_type=None, input_file=None):
+    """保存tushare基金 基础信息以及扩展信息， 包括 basic信息，规模信息 net_asset 基金年度收益率信息"""
+    if input_file is None:
+        fund = None
+    else:
+        fund = pd.read_csv(input_file)
+    fund_info = get_data.append_fund_basic(period_query, found_date_sel, market, fund_type, fund)
+    logging.info('fund number: {}'.format(fund_info.shape[0]))
+    fund_info.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return fund_info
 
 
 def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio_file=''):
@@ -47,6 +47,8 @@ def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio
         portfolio_total = portfolio_total.append(fio, ignore_index=True)
         if fio.empty:
             print('No {} portfolio data'.format(row.get('ts_code')))
+        else:
+            print('{} ann date: {}'.format(row.get('ts_code'), fio.get('end_date').drop_duplicates().tolist()))
     portfolio_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return portfolio_total
 
@@ -103,59 +105,54 @@ def analysis_fund_fio(portfolio_dir=r'final_data\fio_all.csv'):
     show_r.show_fund_major_stocks(sco_c)
 
 
-def self_fund_pro(fund_dir, save_dir=''):
-    """process self fund: append fund manager, net asset info..."""
-    fund_self = pd.read_excel(fund_dir, dtype={'code': str})
-    fund_e = db.query_fund_basic(market='E')
-    fund_o = db.query_fund_basic(market='O')
-    fund_eo = pd.concat([fund_e, fund_o], axis=0)
-    fund_ap = pd.DataFrame(columns=fund_eo.columns)
-    for i, row in fund_self.iterrows():
-        ts_code = db.query_ts_code_by_code(row.get('code'), fund_db=fund_eo)
-        fund_ap.loc[i, :] = fund_eo[fund_eo['ts_code'] == ts_code].values
-    fund_ap.to_csv(save_dir, index=False, encoding='utf_8_sig')
-    return fund_ap
+def save_my_fund_ab(period_query, save_dir, my_file, query_file=None):
+    """ save my selective fund: append info - fund manager, net asset info..."""
+    my_fund = pd.read_excel(my_file, dtype={'code': str})
+    if query_file is None:
+        query_info = None
+    else:
+        query_info = pd.read_csv(query_file)
+    my_fund_basic = get_data.self_fund_pro(my_fund, query_basic=query_info)
+    my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
+    logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
+    my_fund_append.to_csv(save_dir, index=False, encoding='utf_8_sig')
 
 
 if __name__ == '__main__':
-
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
     # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
-    index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
-    # date_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-    #                          '20181228', '20191231', '20201231', '20111230'],
-    #           'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-    #                        '20191231', '20201231', '20211231', '20211231'],
-    #           'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', 'all']}
+    # index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
     # index_name = ['上证指数', '沪深300', '中证500']
-    date_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20161230'],
-              'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20220119', '20220119'],
-              'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
-    # save_file = r'.\rst_out\index_yield_rate_tt.csv'
-    # rst = save_index_ratio(date_q, index_name, save_file)
+    # period_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
+    #                            '20181228', '20191231', '20201231', '20111230'],
+    #             'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
+    #                          '20191231', '20201231', '20211231', '20211231'],
+    #             'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
+    #                              '2020', '2021', 'all']}
+    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20161230'],
+                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20220119', '20220119'],
+                'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
 
-    # save_file = r'.\rst_out\fund_yield_rate_t1.csv'
+    # save_file = r'.\rst_out\index_yield_rate_tt.csv'
+    # rst = save_index_ratio(period_q, index_name, save_file)
+
     # save_file = r'rst_out\fund_basic_exchange_total_a.csv'
     # save_file = r'rst_out\fund_basic_open_total_a.csv'
-    save_file = r'rst_out\fio_open.csv'
-    # save_file = r'rst_out\fund_basic_exchange_all.csv'
-    # i_file = r'rst_out\fund_basic_open_a.csv'
-    i_file = r'rst_out\stock_total.csv'
-    # code = ('159934.SZ', '518880.SH', '518800.SH')
-    code, start, end = '167508.SZ', '20210930', '20220101'
-    b_file = r'rst_out\fund_basic_open_a.csv'
+    # i_fund_file = r'rst_out\fund_basic_open_a.csv'
+    # fund_all = save_tu_fund_ab(period_q, save_file, input_file=i_fund_file)
 
-    # fund_all = save_fund_with_basic(save_file, date_q, date_sel='20210101', market='E', fund_type=None,
-    #                                 input_file=i_file)
+    # save_file = r'rst_out\my_fund_total_t.csv'
+    # my_fund_file = r'rst_out\my_fund_raw.xlsx'
+    # query_basic_f = r'rst_out\query_fund_basic.csv'
+    # save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
-    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_file)
-
+    # start, end = '20211230', '20220201'
+    # i_stock_file = r'rst_out\stock_total.csv'
+    # b_file = r'rst_out\fund_basic_exchange_all.csv'
+    # b_file = r'rst_out\my_fund_total.csv'
+    # save_file = r'rst_out\fio_exchange_t.csv'
+    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
     # analysis_fund_fio()
-    save_f = r'rst_out\fund_self_total.csv'
-    # self_fund_pro(r'rst_out\fund_self.xlsx', r'rst_out\fund_self_a.csv')
-    save_fund_with_basic(save_f, date_q, input_file=r'rst_out\fund_self_a.csv')
-
-
 
