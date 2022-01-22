@@ -25,14 +25,14 @@ pro = ts.pro_api()
 # f.to_csv(r'rst_out\fund_open_raw.csv', index=False, encoding='utf_8_sig')
 # pro.fund_nav(ts_code='450009.OF')
 # pro.fund_share(ts_code='161005.SZ')
-s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630',
-                       end_date='20220101')  # 167508.SZ 450009.OF
+s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='20220121')  # 167508.SZ 450009.OF
 # pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
 # stock_total = pro.stock_basic(ts_code='')
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
 # stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
 
 get_data = GetCustomData()
+db = QueryTuShareData()
 
 # index_code = '000300.SH'
 # index_info = get_data.query_index_basic(index_code, '', market='SSE')
@@ -49,6 +49,9 @@ get_data = GetCustomData()
 # stn = get_data.query_stock_name('000001.SZ')
 # fund_manager = get_data.query_fund_manager('167508.SZ')
 # share = get_data.query_fund_share('167508.SZ')
+
+code, start, end = '001763.OF', '20211230', '20220201'
+portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 
 
 fo = pd.read_csv(r'rst_out\fio_open.csv')

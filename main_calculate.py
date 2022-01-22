@@ -35,6 +35,7 @@ def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210101', market='E
 def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio_file=''):
     """根据基金basic总表，循环查询append portfolio"""
     portfolio_total = pd.DataFrame()
+    ann_num = 0
     if not basic_file:
         fund_basic = get_data.query_fund_basic(market='E', fund_type=['股票型', '混合型'])
     else:
@@ -42,14 +43,18 @@ def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio
         fund_basic = fund_basic[fund_basic['fund_type'].isin(['股票型', '混合型'])]
     for i, row in fund_basic.iterrows():
         print('start query: {} {} portfolio data'.format(i, row.get('ts_code')))
-        time.sleep(0.9)
+        time.sleep(0.85)
         fio = get_data.append_fund_portfolio_name(row.get('ts_code'), start_date, end_date, portfolio_file)
-        portfolio_total = portfolio_total.append(fio, ignore_index=True)
         if fio.empty:
             print('No {} portfolio data'.format(row.get('ts_code')))
         else:
+            fio['fund_code'] = row.get('ts_code')
+            fio['fund_name'] = row.get('name')
+            portfolio_total = portfolio_total.append(fio, ignore_index=True)
+            ann_num += 1
             print('{} ann date: {}'.format(row.get('ts_code'), fio.get('end_date').drop_duplicates().tolist()))
     portfolio_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    print('announce fund number: {}'.format(ann_num))
     return portfolio_total
 
 
@@ -97,10 +102,10 @@ def cal_invest_yield(ts_code, date_start, date_end):
     show_r.show_average_principal(ax, pri_average_w)
 
 
-def analysis_fund_fio(portfolio_dir=r'final_data\fio_all.csv'):
+def analysis_fund_fio(portfolio_dir=r'final_data\fio_all.csv', count=1):
     op = AdvOperation()
-    sco = op.count_fund_major_stocks(portfolio_dir=portfolio_dir)
-    sco_c = sco.iloc[200:250]
+    sco = op.count_fund_major_stocks(portfolio_dir=portfolio_dir, count=count)
+    sco_c = sco.iloc[100:150]
     show_r = ShowRst()
     show_r.show_fund_major_stocks(sco_c)
 
@@ -153,9 +158,10 @@ if __name__ == '__main__':
 
     start, end = '20211230', '20220201'
     i_stock_file = r'final_data\query_db\stock_total.csv'
-    b_file = r'rst_out\fund_basic_exchange_all.csv'
-    b_file = r'rst_out\my_fund_total.csv'
-    save_file = r'rst_out\fio_exchange_t.csv'
-    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
-    analysis_fund_fio()
+    # b_file = r'rst_out\fund_basic_exchange.csv'
+    b_file = r'rst_out\my_fund_total_t.csv'
+    save_file = r'rst_out\fio_exchange_20211231.csv'
+    # save_file = r'rst_out\fio_my_fund_20211231.csv'
+    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
+    analysis_fund_fio(save_file, count=4)
 

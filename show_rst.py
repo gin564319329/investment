@@ -44,7 +44,8 @@ class ShowRst:
         plt.bar(sc_df['stock_name'], sc_df['hold_num'])
         plt.ylabel('持仓基金数目')
         plt.title('偏股型公募基金重仓股统计')
-        plt.xticks(rotation=-45)
+        plt.xticks(rotation=-60, size=7)
+        plt.tight_layout()
         plt.show()
 
 
