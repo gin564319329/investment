@@ -25,7 +25,8 @@ pro = ts.pro_api()
 # f.to_csv(r'rst_out\fund_open_raw.csv', index=False, encoding='utf_8_sig')
 # pro.fund_nav(ts_code='450009.OF')
 # pro.fund_share(ts_code='161005.SZ')
-s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630', end_date='20220101')  # 167508.SZ 450009.OF
+s = pro.fund_portfolio(ts_code='167508.SZ', ann_date='', start_date='20210630',
+                       end_date='20220101')  # 167508.SZ 450009.OF
 # pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
 # stock_total = pro.stock_basic(ts_code='')
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
