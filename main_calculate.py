@@ -143,16 +143,19 @@ if __name__ == '__main__':
     # i_fund_file = r'rst_out\fund_basic_open_a.csv'
     # fund_all = save_tu_fund_ab(period_q, save_file, input_file=i_fund_file)
 
+    # period_q = {'date_start': ['20211231'],
+    #             'date_end': ['20220119'],
+    #             'query_period': ['2022']}
     # save_file = r'rst_out\my_fund_total_t.csv'
     # my_fund_file = r'rst_out\my_fund_raw.xlsx'
-    # query_basic_f = r'rst_out\query_fund_basic.csv'
+    # query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     # save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
-    # start, end = '20211230', '20220201'
-    # i_stock_file = r'rst_out\stock_total.csv'
-    # b_file = r'rst_out\fund_basic_exchange_all.csv'
-    # b_file = r'rst_out\my_fund_total.csv'
-    # save_file = r'rst_out\fio_exchange_t.csv'
-    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
-    # analysis_fund_fio()
+    start, end = '20211230', '20220201'
+    i_stock_file = r'final_data\query_db\stock_total.csv'
+    b_file = r'rst_out\fund_basic_exchange_all.csv'
+    b_file = r'rst_out\my_fund_total.csv'
+    save_file = r'rst_out\fio_exchange_t.csv'
+    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
+    analysis_fund_fio()
 
