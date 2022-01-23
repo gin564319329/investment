@@ -5,6 +5,7 @@
 /.idea/
 /__pycache__/
 /Untitled.ipynb
-/rst_out/
+/rst_out/temp
 /.ipynb_checkpoints/
 /run_fund.log
+/rst_out/run_fund.log

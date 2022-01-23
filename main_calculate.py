@@ -42,17 +42,16 @@ def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio
         fund_basic = pd.read_csv(basic_file)
         fund_basic = fund_basic[fund_basic['fund_type'].isin(['股票型', '混合型'])]
     for i, row in fund_basic.iterrows():
-        print('start query: {} {} portfolio data'.format(i, row.get('ts_code')))
-        time.sleep(0.85)
-        fio = get_data.append_fund_portfolio_name(row.get('ts_code'), start_date, end_date, portfolio_file)
+        ts_code = row.get('ts_code')
+        print('start query: {} {} portfolio data'.format(i, ts_code))
+        time.sleep(0.88)
+        fio = get_data.append_fund_portfolio_name(ts_code, row.get('name'), start_date, end_date, portfolio_file)
         if fio.empty:
-            print('No {} portfolio data'.format(row.get('ts_code')))
+            print('No {} portfolio data'.format(ts_code))
         else:
-            fio['fund_code'] = row.get('ts_code')
-            fio['fund_name'] = row.get('name')
             portfolio_total = portfolio_total.append(fio, ignore_index=True)
             ann_num += 1
-            print('{} ann date: {}'.format(row.get('ts_code'), fio.get('end_date').drop_duplicates().tolist()))
+            print('{} ann date: {}'.format(ts_code, fio.get('end_date').drop_duplicates().tolist()))
     portfolio_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
     print('announce fund number: {}'.format(ann_num))
     return portfolio_total
@@ -136,9 +135,9 @@ if __name__ == '__main__':
     #                          '20191231', '20201231', '20211231', '20211231'],
     #             'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
     #                              '2020', '2021', 'all']}
-    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20161230'],
-                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20220119', '20220119'],
-                'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
+    # period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20161230'],
+    #             'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20220119', '20220119'],
+    #             'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
 
     # save_file = r'.\rst_out\index_yield_rate_tt.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
@@ -152,16 +151,16 @@ if __name__ == '__main__':
     #             'date_end': ['20220119'],
     #             'query_period': ['2022']}
     # save_file = r'rst_out\my_fund_total_t.csv'
-    # my_fund_file = r'rst_out\my_fund_raw.xlsx'
+    # my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     # query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     # save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
     start, end = '20211230', '20220201'
     i_stock_file = r'final_data\query_db\stock_total.csv'
-    # b_file = r'rst_out\fund_basic_exchange.csv'
-    b_file = r'rst_out\my_fund_total_t.csv'
+    b_file = r'final_data\query_db\fund_basic_exchange_raw.csv'
+    # b_file = r'rst_out\my_fund_total_t.csv'
     save_file = r'rst_out\fio_exchange_20211231.csv'
     # save_file = r'rst_out\fio_my_fund_20211231.csv'
-    # portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
-    analysis_fund_fio(save_file, count=4)
+    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
+    # analysis_fund_fio(save_file, count=4)
 

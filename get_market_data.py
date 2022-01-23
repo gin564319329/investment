@@ -190,7 +190,7 @@ class GetCustomData(QueryTuShareData):
 
         return fund_append
 
-    def append_fund_portfolio_name(self, ts_code, start_date, end_date, input_file=''):
+    def append_fund_portfolio_name(self, fund_code, fund_name, start_date, end_date, input_file=''):
         """根据基金代码append基金持仓股票名称
         end_date 截止日期
         symbol 股票代码
@@ -198,9 +198,9 @@ class GetCustomData(QueryTuShareData):
         amount 持有股票数量（万股）- 根据原始数据换算
         stk_float_ratio 占流通股本比例(%)"""
         try:
-            portfolio = self.query_fund_portfolio(ts_code, start_date=start_date, end_date=end_date)
+            portfolio = self.query_fund_portfolio(fund_code, start_date=start_date, end_date=end_date)
         except Exception as terr:
-            print('fail to query {} fund_portfolio: {}'.format(ts_code, terr))
+            print('fail to query {} fund_portfolio: {}'.format(fund_code, terr))
             return pd.DataFrame()
         if not input_file:
             stock_db = self.query_stock_name()
@@ -216,6 +216,7 @@ class GetCustomData(QueryTuShareData):
             stock_bat.at[i, 'stock_name'] = stock_name.iloc[0]
         stock_bat['mkv'] = stock_bat['mkv']/1e8
         stock_bat['amount'] = stock_bat['amount']/1e4
+        stock_bat['fund_name'] = fund_name
         return stock_bat.drop(['ann_date', 'stk_mkv_ratio'], axis=1)
 
     @staticmethod
