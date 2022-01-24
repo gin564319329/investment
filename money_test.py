@@ -54,10 +54,10 @@ code, start, end = '001763.OF', '20211230', '20220201'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 
 
-fo = pd.read_csv(r'rst_out\fio_open.csv')
-fe = pd.read_csv(r'rst_out\fio_exchange.csv')
+fo = pd.read_csv(r'rst_out\fio_open_20211231.csv')
+fe = pd.read_csv(r'rst_out\fio_exchange_20211231.csv')
 fa = pd.concat([fo, fe], axis=0, ignore_index=True)
-fa.to_csv(r'rst_out\fio_all.csv', index=False, encoding='utf_8_sig')
+fa.to_csv(r'rst_out\fio_all_20211231.csv', index=False, encoding='utf_8_sig')
 
 fdo = pd.read_csv(r'rst_out\fund_basic_open_total_a.csv')
 fdo1 = fdo[fdo['fund_type'].isin(['股票型', '混合型'])]
