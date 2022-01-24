@@ -101,12 +101,9 @@ def cal_invest_yield(ts_code, date_start, date_end):
     show_r.show_average_principal(ax, pri_average_w)
 
 
-def analysis_fund_fio(portfolio_dir=r'final_data\fio_all.csv', count=1):
-    op = AdvOperation()
-    sco = op.count_fund_major_stocks(portfolio_dir=portfolio_dir, count=count)
-    sco_c = sco.iloc[100:150]
-    show_r = ShowRst()
-    show_r.show_fund_major_stocks(sco_c)
+def analysis_fund_fio(fio_dir, save_count, count=2):
+    sco = AdvOperation().count_fund_major_stocks(fio_dir, save_count, count)
+    ShowRst().show_fund_major_stocks(sco.iloc[0:51])
 
 
 def save_my_fund_ab(period_query, save_dir, my_file, query_file=None):
@@ -147,20 +144,20 @@ if __name__ == '__main__':
     # i_fund_file = r'rst_out\fund_basic_open_a.csv'
     # fund_all = save_tu_fund_ab(period_q, save_file, input_file=i_fund_file)
 
-    # period_q = {'date_start': ['20211231'],
-    #             'date_end': ['20220119'],
-    #             'query_period': ['2022']}
-    # save_file = r'rst_out\my_fund_total_t.csv'
-    # my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
-    # query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-    # save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
+    period_q = {'date_start': ['20211231'],
+                'date_end': ['20220119'],
+                'query_period': ['2022']}
+    save_file = r'rst_out\my_fund_total_t.csv'
+    my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
+    query_basic_f = r'final_data\query_db\query_fund_basic.csv'
+    save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
-    start, end = '20211230', '20220201'
-    i_stock_file = r'final_data\query_db\stock_total.csv'
-    b_file = r'final_data\query_db\fund_basic_exchange_raw.csv'
-    # b_file = r'rst_out\my_fund_total_t.csv'
-    save_file = r'rst_out\fio_exchange_20211231.csv'
-    # save_file = r'rst_out\fio_my_fund_20211231.csv'
-    portfolio_t = save_fund_portfolio(start, end, save_file, basic_file=b_file, portfolio_file=i_stock_file)
-    # analysis_fund_fio(save_file, count=4)
+    # i_stock_file = r'final_data\query_db\stock_total.csv'
+    # b_file = r'final_data\query_db\fund_basic_exchange_raw.csv'
+    # # b_file = r'rst_out\my_fund_total_t.csv'
+    # save_fio_file = r'rst_out\fio_exchange_20211231.csv'
+    # # save_fio_file = r'rst_out\fio_my_fund_20211231.csv'
+    # save_count_file = r'rst_out\fio_count_e_20211231.csv'
+    # portfolio_t = save_fund_portfolio('20211230', '20220201', save_fio_file, b_file, i_stock_file)
+    # analysis_fund_fio(save_fio_file, save_count_file, count=4)
 

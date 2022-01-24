@@ -43,14 +43,14 @@ class AdvOperation:
         return yield_con
 
     @staticmethod
-    def count_fund_major_stocks(portfolio_dir=r'final_data\fio_exchange.csv', save_dir='', count=4):
+    def count_fund_major_stocks(portfolio_dir, save_count='', count=2):
         port_o = pd.read_csv(portfolio_dir)
         s_count = port_o['stock_name'].value_counts()
         s_c = s_count[s_count.values >= count]
         s_c_dict = {'stock_name': s_c.index.tolist(), 'hold_num': s_c.tolist()}
         s_c_df = pd.DataFrame.from_dict(s_c_dict)
-        if save_dir:
-            s_c_df.to_csv(save_dir, index=False, encoding='utf_8_sig')
+        if save_count:
+            s_c_df.to_csv(save_count, index=False, encoding='utf_8_sig')
         return s_c_df
 
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     op = AdvOperation()
-    sco = op.count_fund_major_stocks(portfolio_dir=r'final_data\fio_all.csv', save_dir=r'rst_out\fio_count_o.csv')
+    sco = op.count_fund_major_stocks(portfolio_dir=r'final_data\fio_all.csv', save_count=r'rst_out\fio_count_o.csv')
     print(sco)
 
 
