@@ -11,6 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import tushare as ts
+from main_calculate import save_index_ratio, save_my_fund_ab
 
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须
@@ -53,7 +54,6 @@ db = QueryTuShareData()
 code, start, end = '001763.OF', '20211230', '20220201'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 
-
 fo = pd.read_csv(r'rst_out\fio_open_20211231.csv')
 fe = pd.read_csv(r'rst_out\fio_exchange_20211231.csv')
 fa = pd.concat([fo, fe], axis=0, ignore_index=True)
@@ -74,3 +74,21 @@ fdo7.to_csv(r'rst_out\fund_sel.csv', index=False, encoding='utf_8_sig')
 
 fdo = pd.read_excel(r'rst_out\fund_self.xlsx', dtype={'code': str})
 
+index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100']
+period_q = {'date_start': ['20211231'],
+            'date_end': ['20220219'],
+            'query_period': ['2022']}
+
+save_file = r'.\rst_out\index_yield_rate_1.csv'
+rst = save_index_ratio(period_q, index_name, save_file)
+
+save_file = r'rst_out\my_fund_total_01.csv'
+my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
+query_basic_f = r'final_data\query_db\query_fund_basic.csv'
+fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
+f_s = fund_ab[fund_ab['fund_type'].isin(['股票型', '混合型'])]
+f_c = f_s.drop(['ts_code', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
+                'm_fee', 'c_fee', 'manager', 'ann_date'], axis=1)
+# fc1 = f_c[['name', '2022']]
+f_c.median()
+fsort = f_c.sort_values(by=['2022'], ascending=False)
