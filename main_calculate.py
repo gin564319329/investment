@@ -20,12 +20,13 @@ logging.basicConfig(level=logging.INFO)
 get_data = GetCustomData()
 
 
-def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210101', market='E', fund_type=None, input_file=None):
+def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210601', market='E', fund_type=None, input_file=None):
     """保存tushare基金 基础信息以及扩展信息， 包括 basic信息，规模信息 net_asset 基金年度收益率信息"""
     if input_file is None:
         fund = None
     else:
         fund = pd.read_csv(input_file)
+        fund = fund[fund['fund_type'].isin(fund_type)]
     fund_info = get_data.append_fund_basic(period_query, found_date_sel, market, fund_type, fund)
     logging.info('fund number: {}'.format(fund_info.shape[0]))
     fund_info.to_csv(save_dir, index=False, encoding='utf_8_sig')
@@ -142,11 +143,11 @@ if __name__ == '__main__':
     # save_file = r'.\rst_out\index_yield_rate_tt.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
 
-    # save_file = r'rst_out\fund_basic_exchange_total_a.csv'
-    # i_fund_file = r'rst_out\fund_basic_exchange_a.csv'
-    save_file = r'rst_out\fund_basic_open_total_a.csv'
-    i_fund_file = r'rst_out\fund_basic_open_a.csv'
-    fund_all = save_tu_fund_ab(period_q, save_file, input_file=i_fund_file)
+    save_file = r'rst_out\fund_basic_exchange_total_a.csv'
+    i_fund_file = r'rst_out\fund_basic_exchange_a.csv'
+    # save_file = r'rst_out\fund_basic_open_total_a.csv'
+    # i_fund_file = r'rst_out\fund_basic_open_a.csv'
+    fund_all = save_tu_fund_ab(period_q, save_file, fund_type=['股票型', '混合型'], input_file=i_fund_file)
 
     # period_q = {'date_start': ['20211231'],
     #             'date_end': ['20220219'],

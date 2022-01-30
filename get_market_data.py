@@ -162,7 +162,7 @@ class GetCustomData(QueryTuShareData):
         if fund_basic is None:
             fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
         fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < found_date_sel]
-        # fund_b_sel.reset_index(drop=True, inplace=True)
+        fund_b_sel.reset_index(drop=True, inplace=True)
         fund_append = fund_b_sel.copy()
         for index, row in fund_b_sel.iterrows():
             manager = self.query_fund_manager(row.get('ts_code'))
