@@ -92,3 +92,10 @@ f_c = f_s.drop(['ts_code', 'management', 'found_date', 'fund_type', 'invest_type
 # fc1 = f_c[['name', '2022']]
 f_c.median()
 fsort = f_c.sort_values(by=['2022'], ascending=False)
+
+p_fund = r'.\rst_out\fund_basic_open_total_a.csv'
+f = pd.read_csv(p_fund)
+f.median()
+f.mean()
+
+
