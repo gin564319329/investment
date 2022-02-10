@@ -9,6 +9,8 @@ class AdvOperation:
         self.cal_base = CalYieldRate()
 
     def cal_index_change_ratio(self, index_daily):
+        if index_daily.empty:
+            return None
         st = index_daily.iloc[0]['price']
         end = index_daily.iloc[-1]['price']
         c_ratio = self.cal_base.cal_change_ratio(st, end)

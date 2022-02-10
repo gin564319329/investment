@@ -41,7 +41,9 @@ class CalYieldRate:
 
     @staticmethod
     def cal_change_ratio(initial_value, final_value):
-        return (final_value - initial_value) / initial_value
+        if initial_value is not None:
+            return (final_value - initial_value) / initial_value
+        return None
 
 
 class CalFixedInvest:
@@ -91,6 +93,8 @@ class CalFixedInvest:
 
     @staticmethod
     def cal_yield(df_invest_data):
+        if df_invest_data.empty:
+            return None, None, None, None, None
         principal = df_invest_data['money'].sum()
         final_price = df_invest_data.iloc[-1]['price']
         final_amount = df_invest_data['share'].sum() * final_price

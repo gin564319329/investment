@@ -35,8 +35,20 @@ s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='202
 get_data = GetCustomData()
 db = QueryTuShareData()
 
-# index_code = '000300.SH'
+
+# code_rst = get_data.get_index_tscode_by_name(['科创50'])
+# index_code = '000688.SH'
 # index_info = get_data.query_index_basic(index_code, '', market='SSE')
+# df_cal_data = get_data.get_index_daily_data(index_code, '20190101', '20220301')
+# fig = plt.figure()
+# ax1 = fig.add_subplot(111)
+# ax1.plot(s.get('date'), s.get('price'))
+# ticks = df_cal_data['date'].tolist()[::20]
+# ax1.set_xticks(ticks)
+# ax1.set_xticklabels(ticks, rotation=45)
+# plt.grid(axis='y')
+# plt.show()
+
 # print(index_info)
 #
 # ts_code, date_start, date_end = '163406.SZ', '20200930', '20220105'  # 450009.OF
