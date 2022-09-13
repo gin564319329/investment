@@ -21,7 +21,7 @@ pd.set_option('display.max_rows', None)
 
 ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
 pro = ts.pro_api()
-# pro.index_basic(ts_code='000001.SH', market='SSE')
+pro.index_basic(ts_code='000001.SH', market='SSE')
 # f = pro.fund_basic(market='O', status='L')
 # f.to_csv(r'rst_out\fund_open_raw.csv', index=False, encoding='utf_8_sig')
 # pro.fund_nav(ts_code='450009.OF')
@@ -35,11 +35,13 @@ s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='202
 get_data = GetCustomData()
 db = QueryTuShareData()
 
-
+code = get_data.query_ts_code_by_code('166006')
 # code_rst = get_data.get_index_tscode_by_name(['科创50'])
-# index_code = '000688.SH'
+index_code = '000688.SH'
 # index_info = get_data.query_index_basic(index_code, '', market='SSE')
 # df_cal_data = get_data.get_index_daily_data(index_code, '20190101', '20220301')
+cal_data_tu = get_data.get_index_daily_data('000001.SH', '20220210', '20220512')
+cal_data_s = cal_data_tu[cal_data_tu['weekday'] == 5]
 # fig = plt.figure()
 # ax1 = fig.add_subplot(111)
 # ax1.plot(s.get('date'), s.get('price'))
@@ -109,5 +111,3 @@ p_fund = r'.\rst_out\fund_basic_open_total_a.csv'
 f = pd.read_csv(p_fund)
 f.median()
 f.mean()
-
-
