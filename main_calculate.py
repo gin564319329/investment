@@ -127,35 +127,35 @@ if __name__ == '__main__':
     # code, start, end = '000300.SH', '20151231', '20171231'
     # cal_invest_yield(code, start, end)
 
-    # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
     index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
     # index_name = ['上证指数', '沪深300', '中证500']
     # period_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-    #                            '20181228', '20191231', '20201231', '20111230'],
+    #                            '20181228', '20191231', '20201231', '20211231', '20111230'],
     #             'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-    #                          '20191231', '20201231', '20211231', '20211231'],
+    #                          '20191231', '20201231', '20211231', '20221231', '20221231'],
     #             'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
-    #                              '2020', '2021', 'all']}
-    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20161230'],
-                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20220219', '20220219'],
+    #                              '2020', '2021', '2022', 'all']}
+    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231',  '20161230'],
+                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
                 'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
 
-    save_file = r'.\rst_out\index_yield_rate_tt.csv'
-    rst = save_index_ratio(period_q, index_name, save_file)
+    save_file = r'.\rst_out\index_yield_rate.csv'
+    # rst = save_index_ratio(period_q, index_name, save_file)
 
+    # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
     save_file = r'rst_out\fund_basic_exchange_total_a.csv'
     i_fund_file = r'rst_out\fund_basic_exchange_a.csv'
     # save_file = r'rst_out\fund_basic_open_total_a.csv'
     # i_fund_file = r'rst_out\fund_basic_open_a.csv'
     # fund_all = save_tu_fund_ab(period_q, save_file, fund_type=['股票型', '混合型'], input_file=i_fund_file)
 
-    # period_q = {'date_start': ['20211231'],
-    #             'date_end': ['20220219'],
-    #             'query_period': ['2022']}
-    # save_file = r'rst_out\my_fund_total_01.csv'
-    # my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
-    # query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-    # fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
+    period_q = {'date_start': ['20211231'],
+                'date_end': ['20221231'],
+                'query_period': ['2022']}
+    save_file = r'rst_out\my_fund_total_2022.csv'
+    my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
+    query_basic_f = r'final_data\query_db\query_fund_basic.csv'
+    fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
     i_stock_file = r'final_data\query_db\stock_total.csv'
     # b_file = r'final_data\query_db\fund_basic_open_raw.csv'

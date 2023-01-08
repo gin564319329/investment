@@ -148,8 +148,11 @@ class GetCustomData(QueryTuShareData):
                 in_ratio = self.op.cal_fixed_inv_change_ratio(index_for_cal)
                 index_yield.at[per, '{}_涨幅'.format(name)] = ch_ratio
                 index_yield.at[per, '{}_定投'.format(name)] = in_ratio
-                print('{} {} change ratio: {}'.format(per, name, ch_ratio))
-                print('{} {} irri profit: {}'.format(per, name, in_ratio))
+                if ch_ratio is not None and in_ratio is not None :
+                    print('{} {} change ratio: {:.2%}'.format(per, name, ch_ratio))
+                    print('{} {} irri profit: {:.2%}'.format(per, name, in_ratio))
+                else:
+                    print('None {} {} change ratio is {}'.format(per, name, in_ratio))
         ch_df = index_yield[[a for a in index_yield.columns if '涨幅' in a]]
         in_df = index_yield[[a for a in index_yield.columns if '定投' in a]]
         ch_df_a = self.op.cal_index_minmax(ch_df, '涨幅')
