@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from advance_fun import AdvOperation
-from get_market_data import QueryTuShareData, GetCustomData
-from fund_tools import CalFixedInvest, CalYieldRate, CalTime
+from data_generator import QueryTuShareData, GetCustomData
+from calculate_utils import CalFixedInvest, CalYieldRate, CalTime
 from show_rst import ShowRst
 import time
 import requests

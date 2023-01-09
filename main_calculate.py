@@ -1,5 +1,5 @@
-from get_market_data import QueryTuShareData, GetCustomData, SaveQueryDB
-from fund_tools import CalFixedInvest, CalYieldRate, CalTime
+from data_generator import QueryTuShareData, GetCustomData, SaveQueryDB
+from calculate_utils import CalFixedInvest, CalYieldRate, CalTime
 from advance_fun import AdvOperation
 from show_rst import ShowRst
 import time
@@ -119,7 +119,7 @@ def save_my_fund_ab(period_query, save_dir, my_file, query_file=None):
     my_fund_basic = get_data.self_fund_pro(my_fund, query_basic=query_info)
     my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
     logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
-    my_fund_append.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    my_fund_append.to_excel(save_dir, index=False, encoding='utf_8_sig')
     return my_fund_append
 
 
@@ -145,14 +145,14 @@ if __name__ == '__main__':
     # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
     save_file = r'rst_out\fund_basic_exchange_total_a.csv'
     i_fund_file = r'rst_out\fund_basic_exchange_a.csv'
-    # save_file = r'rst_out\fund_basic_open_total_a.csv'
-    # i_fund_file = r'rst_out\fund_basic_open_a.csv'
-    # fund_all = save_tu_fund_ab(period_q, save_file, fund_type=['股票型', '混合型'], input_file=i_fund_file)
+    save_file = r'rst_out\fund_basic_open_total_a.csv'
+    i_fund_file = r'rst_out\fund_basic_open_a.csv'
+    fund_all = save_tu_fund_ab(period_q, save_file, fund_type=['股票型', '混合型'], input_file=i_fund_file)
 
     period_q = {'date_start': ['20211231'],
                 'date_end': ['20221231'],
                 'query_period': ['2022']}
-    save_file = r'rst_out\my_fund_total_2022.csv'
+    save_file = r'rst_out\my_fund_total_2022.xlsx'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)

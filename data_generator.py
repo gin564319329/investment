@@ -253,7 +253,6 @@ class SaveQueryDB(QueryTuShareData):
 
     def __init__(self, save_dir):
         super(SaveQueryDB, self).__init__()
-        self.op = AdvOperation()
         self.save_dir = save_dir
 
     def save_fund_basic_raw(self):
@@ -261,8 +260,9 @@ class SaveQueryDB(QueryTuShareData):
         fund_e = self.query_fund_basic(market='E')
         fund_o = self.query_fund_basic(market='O')
         fund_eo = pd.concat([fund_e, fund_o], axis=0)
-        save_file = os.path.join(self.save_dir, 'query_fund_basic.csv')
-        fund_eo.to_csv(save_file, index=False, encoding='utf_8_sig')
+        fund_eo.to_csv(os.path.join(self.save_dir, 'query_fund_basic.csv'), index=False, encoding='utf_8_sig')
+        fund_e.to_csv(os.path.join(self.save_dir, 'query_fund_basic_exchange.csv'), index=False, encoding='utf_8_sig')
+        fund_o.to_csv(os.path.join(self.save_dir, 'query_fund_basic_open.csv'), index=False, encoding='utf_8_sig')
 
 
 if __name__ == '__main__':
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     # in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
     # print('change rate: {:.2%}'.format(ch_r))
     # print('irri rate: {:.2%}'.format(in_r))
-    #
+
     # fund_b = r'rst_out\fund_basic_exchange_raw.csv'
     # portfolio_raw = r'rst_out\fio_exchange.csv'
     # port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
