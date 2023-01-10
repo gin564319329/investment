@@ -143,11 +143,13 @@ if __name__ == '__main__':
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
-    # save_file = r'rst_out\exchange_fund_yield_rate_202301.csv'
+    # fund_type = ['股票型', '混合型']
+    fund_type = ['债券型']
+    # save_file = r'rst_out\exchange_fund_yield_rate_bond_202301.csv'
     # query_basic_file = r'final_data/query_db/query_fund_basic_exchange.csv'
-    save_file = r'rst_out\open_fund_yield_rate_202301.csv'
+    save_file = r'rst_out\open_fund_yield_rate_bond_202301.csv'
     query_basic_file = r'final_data/query_db/query_fund_basic_open.csv'
-    fund_all = save_tu_fund_ab(period_q, save_file, fund_type=['股票型', '混合型'], query_basic=query_basic_file)
+    fund_all = save_tu_fund_ab(period_q, save_file, fund_type=fund_type, query_basic=query_basic_file)
 
     period_q = {'date_start': ['20211231'],
                 'date_end': ['20221231'],
