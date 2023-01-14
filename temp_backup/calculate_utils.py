@@ -52,14 +52,14 @@ class CalFixedInvest:
         self.market_data = df_market_data
         self.money_a = money_amount
 
-    def fixed_invest_by_week(self, weekday):
+    def gen_data_week_fixed_invest(self, weekday):
         """未考虑节假日"""
         df_invest_data = self.market_data[self.market_data['weekday'] == weekday].copy()
         df_invest_data['money'] = self.money_a
         df_invest_data['share'] = self.money_a / df_invest_data['price']
         return df_invest_data
 
-    def fixed_invest_by_month(self, month_day):
+    def gen_data_month_fixed_invest(self, month_day):
         date_list = []
         day_invest_list = []
         df_invest_data = pd.DataFrame()

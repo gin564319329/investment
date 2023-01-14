@@ -1,11 +1,11 @@
 import pandas as pd
-from calculate_utils import CalFixedInvest, CalYieldRate
+import basic_calculator as yc
 
 
 class AdvOperation:
 
     def __init__(self):
-        self.cal_base = CalYieldRate()
+        self.cal_base = yc
 
     def cal_index_change_ratio(self, index_daily):
         if index_daily.empty:
@@ -15,10 +15,8 @@ class AdvOperation:
         c_ratio = self.cal_base.cal_change_ratio(st, end)
         return c_ratio
 
-    def cal_fixed_inv_change_ratio(self, index_daily):
-        fit = CalFixedInvest(index_daily, money_amount=500)
-        invest_data = fit.fixed_invest_by_week(weekday=4)
-        principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = fit.cal_yield(invest_data)
+    def cal_fixed_inv_change_ratio(self, invest_data):
+        principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = self.cal_invest_profit(invest_data)
         i_ratio = self.cal_base.cal_change_ratio(principal_w, final_amount_w)
         return i_ratio
 
@@ -53,6 +51,18 @@ class AdvOperation:
         if save_count:
             s_c_df.to_csv(save_count, index=False, encoding='utf_8_sig')
         return s_c_df
+
+    @staticmethod
+    def cal_invest_profit(df_invest_data):
+        if df_invest_data.empty:
+            return None, None, None, None, None
+        principal = df_invest_data['money'].sum()
+        final_price = df_invest_data.iloc[-1]['price']
+        final_amount = df_invest_data['share'].sum() * final_price
+        profit = final_amount - principal
+        buy_num = df_invest_data['money'].size
+        pri_average = principal / df_invest_data['share'].sum()
+        return principal, final_amount, profit, buy_num, pri_average
 
 
 if __name__ == '__main__':

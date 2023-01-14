@@ -1,10 +1,12 @@
-from data_generator import QueryTuShareData, GetCustomData, SaveQueryDB
-from calculate_utils import CalFixedInvest, CalYieldRate, CalTime
-from advance_fun import AdvOperation
+from data_generator import GenCustomData, GenFixedInvest
 from show_rst import ShowRst
 import time
 import pandas as pd
 import logging
+import basic_calculator as yc
+import data_calculator as dca
+from basic_calculator import CalTime
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.unicode.ambiguous_as_wide', True)
@@ -17,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 #                     filename=r'rst_out/run_fund.log',
 #                     filemode='a')
 
-get_data = GetCustomData()
+get_data = GenCustomData()
 
 
 def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210601', market='E', fund_type=None, query_basic=None):
@@ -70,12 +72,12 @@ def cal_invest_yield(ts_code, date_start, date_end):
     m_day = 20
     cal_data_tu = get_data.get_index_daily_data(ts_code, date_start, date_end)
 
-    fit = CalFixedInvest(cal_data_tu, money_amount=500)
-    fit_m = CalFixedInvest(cal_data_tu, money_amount=2000)
-    df_invest_data_w = fit.fixed_invest_by_week(weekday=weekday)
-    df_invest_data_m = fit_m.fixed_invest_by_month(month_day=m_day)
-    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = fit.cal_yield(df_invest_data_w)
-    principal_m, final_amount_m, profit_m, buy_num_m, pri_average_m = fit.cal_yield(df_invest_data_m)
+    fix = GenFixedInvest(cal_data_tu, money_amount=500)
+    fix_m = GenFixedInvest(cal_data_tu, money_amount=2000)
+    invest_data_w = fix.gen_data_week_fixed_invest(weekday=weekday)
+    invest_data_m = fix_m.gen_data_month_fixed_invest(month_day=m_day)
+    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = dca.cal_invest_profit(invest_data_w)
+    principal_m, final_amount_m, profit_m, buy_num_m, pri_average_m = dca.cal_invest_profit(invest_data_m)
     print('week: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_w, final_amount_w, profit_w,
                                                                                   buy_num_w))
     print(
@@ -90,20 +92,19 @@ def cal_invest_yield(ts_code, date_start, date_end):
     val_arr_m = [2000] * 12
     val_arr_m.append(-final_amount_m)
 
-    yr = CalYieldRate()
-    rate_w = yr.cal_total_rate(principal_w, final_amount_w)
-    rate_m = yr.cal_total_rate(principal_m, final_amount_m)
-    rate_w_irr = yr.cal_irr_by_fixed_invest(val_arr_w, 50)
-    rate_m_irr = yr.cal_irr_by_fixed_invest(val_arr_m, 12)
+    rate_w = yc.cal_total_rate(principal_w, final_amount_w)
+    rate_m = yc.cal_total_rate(principal_m, final_amount_m)
+    rate_w_irr = yc.cal_irr_by_fixed_invest(val_arr_w, 50)
+    rate_m_irr = yc.cal_irr_by_fixed_invest(val_arr_m, 12)
 
     show_r = ShowRst()
     ax = show_r.gen_one_ax()
-    show_r.show_cumulative_value(ax, cal_data_tu, df_invest_data_w)
+    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w)
     show_r.show_average_principal(ax, pri_average_w)
 
 
 def analysis_fund_fio(fio_dir, save_count, count=2):
-    sco = AdvOperation().count_fund_major_stocks(fio_dir, save_count, count)
+    sco = dca.count_fund_major_stocks(fio_dir, save_count, count)
     ShowRst().show_fund_major_stocks(sco.iloc[0:51])
     # ShowRst().show_fund_major_stocks(sco.iloc[51:101])
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])

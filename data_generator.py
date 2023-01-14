@@ -1,11 +1,11 @@
 import time
 import pandas as pd
 import tushare as ts
-from datetime import datetime, timedelta
 import logging
 import numpy as np
 import os
-from advance_fun import AdvOperation
+from datetime import date, datetime
+import data_calculator as dca
 
 
 class QueryTuShareData:
@@ -87,11 +87,11 @@ class QueryTuShareData:
         return self.pro.stock_basic(ts_code=ts_code)
 
 
-class GetCustomData(QueryTuShareData):
+class GenCustomData(QueryTuShareData):
 
     def __init__(self):
-        super(GetCustomData, self).__init__()
-        self.op = AdvOperation()
+        super(GenCustomData, self).__init__()
+        self.op = dca
 
     def get_index_daily_data(self, ts_code, date_start, date_end):
         tu_data = self.query_index_daily(ts_code, date_start, date_end)
@@ -143,12 +143,14 @@ class GetCustomData(QueryTuShareData):
         index_yield = pd.DataFrame(index=date_query['query_period'])
         for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
             for code, name in zip(index_query.get('ts_code'), index_query.get('name')):
-                index_for_cal = self.get_index_daily_data(code, start, end)
-                ch_ratio = self.op.cal_index_change_ratio(index_for_cal)
-                in_ratio = self.op.cal_fixed_inv_change_ratio(index_for_cal)
+                index_data = self.get_index_daily_data(code, start, end)
+                fix = GenFixedInvest(index_data, money_amount=500)
+                invest_data = fix.gen_data_week_fixed_invest(weekday=4)
+                ch_ratio = self.op.cal_index_change_ratio(index_data)
+                in_ratio = self.op.cal_fixed_inv_change_ratio(invest_data)
                 index_yield.at[per, '{}_涨幅'.format(name)] = ch_ratio
                 index_yield.at[per, '{}_定投'.format(name)] = in_ratio
-                if ch_ratio is not None and in_ratio is not None :
+                if ch_ratio is not None and in_ratio is not None:
                     print('{} {} change ratio: {:.2%}'.format(per, name, ch_ratio))
                     print('{} {} irri profit: {:.2%}'.format(per, name, in_ratio))
                 else:
@@ -265,8 +267,54 @@ class SaveQueryDB(QueryTuShareData):
         fund_o.to_csv(os.path.join(self.save_dir, 'query_fund_basic_open.csv'), index=False, encoding='utf_8_sig')
 
 
+class GenFixedInvest:
+
+    def __init__(self,  df_market_data, money_amount):
+        self.market_data = df_market_data
+        self.money_a = money_amount
+
+    def gen_data_week_fixed_invest(self, weekday):
+        """未考虑节假日"""
+        df_invest_data = self.market_data[self.market_data['weekday'] == weekday].copy()
+        df_invest_data['money'] = self.money_a
+        df_invest_data['share'] = self.money_a / df_invest_data['price']
+        return df_invest_data
+
+    def gen_data_month_fixed_invest(self, month_day):
+        date_list = []
+        day_invest_list = []
+        df_invest_data = pd.DataFrame()
+        for year in self.market_data['year'].drop_duplicates():
+            year_invest_data = self.market_data[self.market_data['year'] == year].copy()
+            for month in year_invest_data['month'].drop_duplicates():
+                self.select_trade_day(date_list, day_invest_list, year_invest_data, year, month, month_day)
+        df_invest_data['date'] = date_list
+        df_invest_data['price'] = day_invest_list
+        df_invest_data['money'] = self.money_a
+        df_invest_data['share'] = self.money_a / df_invest_data['price']
+        return df_invest_data
+
+    @staticmethod
+    def select_trade_day(date_list, day_invest_list, year_invest_data, year, month, month_day):
+        """月定投日-非交易日处理"""
+        month_invest_data = year_invest_data[year_invest_data['month'] == month]
+        day_invest_data = month_invest_data[month_invest_data['day'] == month_day].copy()
+        if month_day in month_invest_data['day'].values:
+            day_invest_list.append(float(day_invest_data['price'].values))
+            date_list.append(date(year, month, month_day).strftime("%Y%m%d"))
+        else:
+            df_sup_day = month_invest_data['day'].values - month_day
+            if df_sup_day[df_sup_day < 0].size > 0:
+                sup_day = df_sup_day[df_sup_day < 0].max() + month_day
+            else:
+                sup_day = df_sup_day[df_sup_day > 0].min() + month_day
+            day_invest_data = month_invest_data[month_invest_data['day'] == sup_day].copy()
+            day_invest_list.append(float(day_invest_data['price'].values))
+            date_list.append(date(year, month, sup_day).strftime("%Y%m%d"))
+
+
 if __name__ == '__main__':
-    cus_data = GetCustomData()
+    cus_data = GenCustomData()
     query_db = SaveQueryDB('rst_out')
 
     # index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')

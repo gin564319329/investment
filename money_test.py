@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from advance_fun import AdvOperation
-from data_generator import QueryTuShareData, GetCustomData
-from calculate_utils import CalFixedInvest, CalYieldRate, CalTime
+from data_generator import QueryTuShareData, GenCustomData
 from show_rst import ShowRst
 import time
 import requests
@@ -32,7 +30,7 @@ s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='202
 # stock_total1 = stock_total.drop(['symbol'], axis=1)
 # stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
 
-get_data = GetCustomData()
+get_data = GenCustomData()
 db = QueryTuShareData()
 
 code = get_data.query_ts_code_by_code('166006')
