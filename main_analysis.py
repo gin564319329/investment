@@ -152,6 +152,7 @@ if __name__ == '__main__':
     save_file = r'rst_out\my_fund_total_2022n.xlsx'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
+    query_basic_f = None
     fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
     i_stock_file = r'final_data\query_db\stock_total.csv'

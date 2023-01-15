@@ -247,7 +247,10 @@ class GenCustomData(QueryTuShareData):
         my_fund_a = pd.DataFrame(columns=query_basic.columns)
         for i, row in my_fund.iterrows():
             ts_code = self.query_ts_code_by_code(row.get('code'), fund_db=query_basic)
-            my_fund_a.loc[i, :] = query_basic[query_basic['ts_code'] == ts_code].values
+            if ts_code is not None:
+                my_fund_a.loc[i, :] = query_basic[query_basic['ts_code'] == ts_code].values
+            else:
+                logging.error('error code: {}'.format(row.get('code')))
         return my_fund_a
 
 
