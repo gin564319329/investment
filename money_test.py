@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import tushare as ts
-from main_calculate import save_index_ratio, save_my_fund_ab
+from main_analysis import save_index_ratio, save_my_fund_ab
 
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须

@@ -22,17 +22,31 @@ logging.basicConfig(level=logging.INFO)
 get_data = GenCustomData()
 
 
-def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210601', market='E', fund_type=None, query_basic=None):
+def save_tu_fund_ab(period_query, save_dir, found_date_sel='20210601', market='E', fund_type=None, query_file=None):
     """保存tushare基金 基础信息以及扩展信息， 包括 basic信息，规模信息 net_asset 基金年度收益率信息"""
-    if query_basic is None:
+    if query_file is None:
         fund = None
     else:
-        fund = pd.read_csv(query_basic)
+        fund = pd.read_csv(query_file)
         fund = fund[fund['fund_type'].isin(fund_type)]
     fund_info = get_data.append_fund_basic(period_query, found_date_sel, market, fund_type, fund)
     logging.info('fund number: {}'.format(fund_info.shape[0]))
     fund_info.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_info
+
+
+def save_my_fund_ab(period_query, save_dir, my_file, query_file=None):
+    """ save my selective fund: append info - fund manager, net asset info..."""
+    my_fund = pd.read_excel(my_file, dtype={'code': str})
+    if query_file is None:
+        query_info = None
+    else:
+        query_info = pd.read_csv(query_file)
+    my_fund_basic = get_data.self_fund_pro(my_fund, query_basic=query_info)
+    my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
+    logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
+    my_fund_append.to_excel(save_dir, index=False, encoding='utf_8_sig')
+    return my_fund_append
 
 
 def save_fund_portfolio(start_date, end_date, save_dir, basic_file='', portfolio_file=''):
@@ -67,9 +81,7 @@ def save_index_ratio(date_query, name_list, save_dir):
     return rst_con
 
 
-def cal_invest_yield(ts_code, date_start, date_end):
-    weekday = 4
-    m_day = 20
+def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
     cal_data_tu = get_data.get_index_daily_data(ts_code, date_start, date_end)
 
     fix = GenFixedInvest(cal_data_tu, money_amount=500)
@@ -110,23 +122,9 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
 
 
-def save_my_fund_ab(period_query, save_dir, my_file, query_file=None):
-    """ save my selective fund: append info - fund manager, net asset info..."""
-    my_fund = pd.read_excel(my_file, dtype={'code': str})
-    if query_file is None:
-        query_info = None
-    else:
-        query_info = pd.read_csv(query_file)
-    my_fund_basic = get_data.self_fund_pro(my_fund, query_basic=query_info)
-    my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
-    logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
-    my_fund_append.to_excel(save_dir, index=False, encoding='utf_8_sig')
-    return my_fund_append
-
-
 if __name__ == '__main__':
-    # code, start, end = '000300.SH', '20151231', '20171231'
-    # cal_invest_yield(code, start, end)
+    code, start, end = '000300.SH', '20151231', '20210430'
+    analysis_invest_yield(code, start, end, weekday=4, m_day=20)
 
     index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
     # index_name = ['上证指数', '沪深300', '中证500']
@@ -150,7 +148,7 @@ if __name__ == '__main__':
     # query_basic_file = r'final_data/query_db/query_fund_basic_exchange.csv'
     save_file = r'rst_out\open_fund_yield_rate_bond_202301.csv'
     query_basic_file = r'final_data/query_db/query_fund_basic_open.csv'
-    fund_all = save_tu_fund_ab(period_q, save_file, fund_type=fund_type, query_basic=query_basic_file)
+    # fund_all = save_tu_fund_ab(period_q, save_file, fund_type=fund_type, query_file=query_basic_file)
 
     period_q = {'date_start': ['20211231'],
                 'date_end': ['20221231'],
