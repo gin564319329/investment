@@ -21,7 +21,7 @@ class ShowRst:
         return ax
 
     @staticmethod
-    def show_cumulative_value(ax1, df_cal_data, df_invest_data):
+    def show_cumulative_value(ax1, df_cal_data, df_invest_data, pri_average):
         ax1.plot(df_cal_data['date'], df_cal_data['price'])
         ax1.plot(df_invest_data['date'], df_invest_data['price'], 'r.')
         ax1.set_ylabel('累计净值')
@@ -30,13 +30,10 @@ class ShowRst:
         ax1.set_xticks(ticks)
         ax1.set_xticklabels(ticks, rotation=45)
         plt.legend(labels=['指数', '定投'], prop={'size': 11}, loc='best')
+        ax1.axhline(y=pri_average, ls='--', c='g')
         plt.title('定投净值曲线')
         plt.grid(axis='y')
         plt.show()
-
-    @staticmethod
-    def show_average_principal(ax1, pri_average):
-        ax1.axhline(y=pri_average, ls='--', c='g')
 
     @staticmethod
     def show_fund_major_stocks(sc_df):

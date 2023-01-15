@@ -96,8 +96,7 @@ def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
                                                                                  buy_num_m))
     show_r = ShowRst()
     ax = show_r.gen_one_ax()
-    show_r.show_average_principal(ax, pri_average_w)
-    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w)
+    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w, pri_average_w)
 
     # cal_time = CalTime(date_start, date_end)
     # month_num = cal_time.cal_month_num()
@@ -120,8 +119,8 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
 
 
 if __name__ == '__main__':
-    code, start, end = '000300.SH', '20151231', '20171231'
-    analysis_invest_yield(code, start, end, weekday=4, m_day=20)
+    # code, start, end = '000300.SH', '20151231', '20171231'
+    # analysis_invest_yield(code, start, end, weekday=4, m_day=20)
 
     index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
     # index_name = ['上证指数', '沪深300', '中证500']
@@ -135,7 +134,7 @@ if __name__ == '__main__':
     #             'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
     #             'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
 
-    # save_file = r'.\rst_out\index_yield_rate.csv'
+    save_file = r'.\rst_out\index_yield_rate.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # fund_type = ['股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型']
@@ -150,10 +149,10 @@ if __name__ == '__main__':
     period_q = {'date_start': ['20211231'],
                 'date_end': ['20221231'],
                 'query_period': ['2022']}
-    save_file = r'rst_out\my_fund_total_2022.xlsx'
+    save_file = r'rst_out\my_fund_total_2022n.xlsx'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-    # fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
+    fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
 
     i_stock_file = r'final_data\query_db\stock_total.csv'
     # b_file = r'final_data\query_db\fund_basic_open_raw.csv'
