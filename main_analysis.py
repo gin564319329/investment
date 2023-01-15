@@ -83,7 +83,6 @@ def save_index_ratio(date_query, name_list, save_dir):
 
 def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
     cal_data_tu = get_data.get_index_daily_data(ts_code, date_start, date_end)
-
     fix = GenFixedInvest(cal_data_tu, money_amount=500)
     fix_m = GenFixedInvest(cal_data_tu, money_amount=2000)
     invest_data_w = fix.gen_data_week_fixed_invest(weekday=weekday)
@@ -95,24 +94,22 @@ def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
     print(
         'month: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_m, final_amount_m, profit_m,
                                                                                  buy_num_m))
+    show_r = ShowRst()
+    ax = show_r.gen_one_ax()
+    show_r.show_average_principal(ax, pri_average_w)
+    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w)
+
     # cal_time = CalTime(date_start, date_end)
     # month_num = cal_time.cal_month_num()
     # x_ticks = cal_time.gen_ticks(month_num)
     val_arr_w = [500] * 50
     val_arr_w.append(-final_amount_w)
-
     val_arr_m = [2000] * 12
     val_arr_m.append(-final_amount_m)
-
     rate_w = yc.cal_total_rate(principal_w, final_amount_w)
     rate_m = yc.cal_total_rate(principal_m, final_amount_m)
     rate_w_irr = yc.cal_irr_by_fixed_invest(val_arr_w, 50)
     rate_m_irr = yc.cal_irr_by_fixed_invest(val_arr_m, 12)
-
-    show_r = ShowRst()
-    ax = show_r.gen_one_ax()
-    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w)
-    show_r.show_average_principal(ax, pri_average_w)
 
 
 def analysis_fund_fio(fio_dir, save_count, count=2):
@@ -123,7 +120,7 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
 
 
 if __name__ == '__main__':
-    code, start, end = '000300.SH', '20151231', '20210430'
+    code, start, end = '000300.SH', '20151231', '20171231'
     analysis_invest_yield(code, start, end, weekday=4, m_day=20)
 
     index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
