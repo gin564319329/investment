@@ -27,9 +27,21 @@ class QueryTuShareData:
         """获取基金列表 基础信息； 交易市场: E场内 O场外（默认E）;  存续状态: D摘牌 I发行 L上市中"""
         if fund_type is None:
             fund_type = []
-        fund_raw = self.pro.fund_basic(market=market, status=status)
-        fund_raw = fund_raw.get(['ts_code', 'name', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
-                                 'm_fee', 'c_fee'])
+        if market == 'E':
+            fund_raw = self.pro.fund_basic(**{"market": market, "status": status},
+                                           fields=['ts_code', 'name', 'management', 'found_date', 'fund_type',
+                                                   'invest_type', 'benchmark', 'm_fee', 'c_fee', 'market'])
+        elif market == 'O':
+            fund_part1 = self.pro.fund_basic(**{"market": market, "offset": 0, "limit": 10000, "status": status},
+                                             fields=['ts_code', 'name', 'management', 'found_date', 'fund_type',
+                                                     'invest_type', 'benchmark', 'm_fee', 'c_fee', 'market'])
+            fund_part2 = self.pro.fund_basic(**{"market": market, "offset": 10000, "limit": 10000, "status": status},
+                                             fields=['ts_code', 'name', 'management', 'found_date', 'fund_type',
+                                                     'invest_type', 'benchmark', 'm_fee', 'c_fee', 'market'])
+            fund_raw = pd.concat([fund_part1, fund_part2], axis=0)
+        else:
+            return None
+        logging.info('query {} fund total number: {}'.format(market, fund_raw.shape[0]))
         if not fund_type:
             fund_sel = fund_raw.copy()
         else:
@@ -162,6 +174,12 @@ class GenCustomData(QueryTuShareData):
 
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
+    def gen_fund_basic_raw(self):
+        """generate fund basic info list: exchange and open """
+        fund_e = self.query_fund_basic(market='E')
+        fund_o = self.query_fund_basic(market='O')
+        return pd.concat([fund_e, fund_o], axis=0)
+
     def append_fund_basic(self, period_query, found_date_sel='20220101', market='E', fund_type=None, fund_basic=None):
         """增加fund_basic 规模信息 net_asset 亿元 基金年度收益率信息 基金经理"""
         if fund_basic is None:
@@ -183,7 +201,8 @@ class GenCustomData(QueryTuShareData):
             print('---append {} {} {}'.format(index, row.get('ts_code'), row.get('name')))
             fund_append.at[index, 'net_asset'], fund_append.at[index, 'ann_date'] = \
                 self.op.get_newest_net_asset(fund_nav)
-            for start, end, per in zip(period_query['date_start'], period_query['date_end'], period_query['query_period']):
+            for start, end, per in zip(period_query['date_start'], period_query['date_end'],
+                                       period_query['query_period']):
                 fund_nav_t = fund_nav[fund_nav['nav_date'].astype('str') >= start]
                 fund_nav_sel = fund_nav_t[fund_nav_t['nav_date'].astype('str') <= end]
                 if fund_nav_sel.empty:
@@ -219,8 +238,8 @@ class GenCustomData(QueryTuShareData):
                 stock_bat.at[i, 'stock_name'] = ''
                 continue
             stock_bat.at[i, 'stock_name'] = stock_name.iloc[0]
-        stock_bat['mkv'] = stock_bat['mkv']/1e8
-        stock_bat['amount'] = stock_bat['amount']/1e4
+        stock_bat['mkv'] = stock_bat['mkv'] / 1e8
+        stock_bat['amount'] = stock_bat['amount'] / 1e4
         stock_bat['fund_name'] = fund_name
         return stock_bat.drop(['ann_date', 'stk_mkv_ratio'], axis=1)
 
@@ -238,12 +257,10 @@ class GenCustomData(QueryTuShareData):
                 port_a.at[i, 'fund_name'] = None
         return port_a
 
-    def self_fund_pro(self, my_fund, query_basic=None):
+    def gen_self_fund_basic(self, my_fund, query_basic=None):
         """process my self fund: append fund manager, net asset info..."""
         if query_basic is None:
-            fund_e = self.query_fund_basic(market='E')
-            fund_o = self.query_fund_basic(market='O')
-            query_basic = pd.concat([fund_e, fund_o], axis=0)
+            query_basic = self.gen_fund_basic_raw()
         my_fund_a = pd.DataFrame(columns=query_basic.columns)
         for i, row in my_fund.iterrows():
             ts_code = self.query_ts_code_by_code(row.get('code'), fund_db=query_basic)
@@ -254,25 +271,9 @@ class GenCustomData(QueryTuShareData):
         return my_fund_a
 
 
-class SaveQueryDB(QueryTuShareData):
-
-    def __init__(self, save_dir):
-        super(SaveQueryDB, self).__init__()
-        self.save_dir = save_dir
-
-    def save_fund_basic_raw(self):
-        """save fund basic info list: exchange and open """
-        fund_e = self.query_fund_basic(market='E')
-        fund_o = self.query_fund_basic(market='O')
-        fund_eo = pd.concat([fund_e, fund_o], axis=0)
-        fund_eo.to_csv(os.path.join(self.save_dir, 'query_fund_basic.csv'), index=False, encoding='utf_8_sig')
-        fund_e.to_csv(os.path.join(self.save_dir, 'query_fund_basic_exchange.csv'), index=False, encoding='utf_8_sig')
-        fund_o.to_csv(os.path.join(self.save_dir, 'query_fund_basic_open.csv'), index=False, encoding='utf_8_sig')
-
-
 class GenFixedInvest:
 
-    def __init__(self,  df_market_data, money_amount):
+    def __init__(self, df_market_data, money_amount):
         self.market_data = df_market_data
         self.money_a = money_amount
 
@@ -318,8 +319,6 @@ class GenFixedInvest:
 
 if __name__ == '__main__':
     cus_data = GenCustomData()
-    query_db = SaveQueryDB('rst_out')
-
     # index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
     # ch_r = cus_data.op.cal_index_change_ratio(index_data)
     # in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)
@@ -331,4 +330,3 @@ if __name__ == '__main__':
     # port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
     # port_e.to_csv(r'rst_out\fio_append_f2.csv', index=False, encoding='utf_8_sig')
 
-    query_db.save_fund_basic_raw()

@@ -20,6 +20,15 @@ pd.set_option('display.max_rows', None)
 ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
 pro = ts.pro_api()
 pro.index_basic(ts_code='000001.SH', market='SSE')
+fund_raw = pro.fund_basic(**{"market": "E", "offset": 1000, "limit": 1000, "status": "L"},
+                          fields=['ts_code', 'name', 'management', 'found_date', 'fund_type',
+                                  'invest_type', 'benchmark',
+                                  'm_fee', 'c_fee'])
+fund_raw1 = pro.fund_basic(**{"market": "E", "offset": 0, "limit": 1000, "status": "L"},
+                           fields=['ts_code', 'name', 'management', 'found_date', 'fund_type',
+                                   'invest_type', 'benchmark',
+                                   'm_fee', 'c_fee'])
+query_basic = pd.concat([fund_raw, fund_raw1], axis=0)
 # f = pro.fund_basic(market='O', status='L')
 # f.to_csv(r'rst_out\fund_open_raw.csv', index=False, encoding='utf_8_sig')
 # pro.fund_nav(ts_code='450009.OF')
