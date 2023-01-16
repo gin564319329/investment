@@ -95,7 +95,7 @@ class QueryTuShareData:
         return None
 
     def query_stock_name(self, ts_code=''):
-        """根据代码查询股票名称"""
+        """根据代码查询股票名称 ts_code=''为查询所有股票列表"""
         return self.pro.stock_basic(ts_code=ts_code)
 
 
@@ -105,7 +105,7 @@ class GenCustomData(QueryTuShareData):
         super(GenCustomData, self).__init__()
         self.op = dca
 
-    def get_index_daily_data(self, ts_code, date_start, date_end):
+    def gen_index_daily_data(self, ts_code, date_start, date_end):
         tu_data = self.query_index_daily(ts_code, date_start, date_end)
         index_for_cal = self.gen_cal_data(tu_data)
         return index_for_cal
@@ -151,11 +151,11 @@ class GenCustomData(QueryTuShareData):
         return cal_data
 
     def gen_index_yield(self, date_query, index_query):
-        """生成指数年度收益率表格"""
+        """生成指数年度收益率及定投收益率表格"""
         index_yield = pd.DataFrame(index=date_query['query_period'])
         for start, end, per in zip(date_query['date_start'], date_query['date_end'], date_query['query_period']):
             for code, name in zip(index_query.get('ts_code'), index_query.get('name')):
-                index_data = self.get_index_daily_data(code, start, end)
+                index_data = self.gen_index_daily_data(code, start, end)
                 fix = GenFixedInvest(index_data, money_amount=500)
                 invest_data = fix.gen_data_week_fixed_invest(weekday=4)
                 ch_ratio = self.op.cal_index_change_ratio(index_data)
@@ -174,7 +174,7 @@ class GenCustomData(QueryTuShareData):
 
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
-    def gen_fund_basic_raw(self):
+    def gen_raw_fund_list(self):
         """generate fund basic info list: exchange and open """
         fund_e = self.query_fund_basic(market='E')
         fund_o = self.query_fund_basic(market='O')
@@ -257,10 +257,10 @@ class GenCustomData(QueryTuShareData):
                 port_a.at[i, 'fund_name'] = None
         return port_a
 
-    def gen_self_fund_basic(self, my_fund, query_basic=None):
-        """process my self fund: append fund manager, net asset info..."""
+    def gen_self_fund_list(self, my_fund, query_basic=None):
+        """process my self fund: add fund manager, net asset info..."""
         if query_basic is None:
-            query_basic = self.gen_fund_basic_raw()
+            query_basic = self.gen_raw_fund_list()
         my_fund_a = pd.DataFrame(columns=query_basic.columns)
         for i, row in my_fund.iterrows():
             ts_code = self.query_ts_code_by_code(row.get('code'), fund_db=query_basic)
@@ -269,6 +269,12 @@ class GenCustomData(QueryTuShareData):
             else:
                 logging.error('error code: {}'.format(row.get('code')))
         return my_fund_a
+
+    def gen_all_stock_list(self):
+        """generate all market stock list: status L"""
+        stock_total = self.query_stock_name(ts_code='')
+        stock_total = stock_total.drop(['symbol'], axis=1)
+        return stock_total
 
 
 class GenFixedInvest:

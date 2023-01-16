@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import tushare as ts
-from main_analysis import save_index_ratio, save_my_fund_ab
+from main_analysis import save_index_ratio, save_my_fund
 
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须
@@ -34,10 +34,10 @@ query_basic = pd.concat([fund_raw, fund_raw1], axis=0)
 # pro.fund_nav(ts_code='450009.OF')
 # pro.fund_share(ts_code='161005.SZ')
 s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='20220121')  # 167508.SZ 450009.OF
-# pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
-# stock_total = pro.stock_basic(ts_code='')
-# stock_total1 = stock_total.drop(['symbol'], axis=1)
-# stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
+pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
+stock_total = pro.stock_basic(ts_code='')
+stock_total1 = stock_total.drop(['symbol'], axis=1)
+stock_total1.to_csv(r'rst_out\stock_total.csv', index=False, encoding='utf_8_sig')
 
 get_data = GenCustomData()
 db = QueryTuShareData()
@@ -47,7 +47,7 @@ code = get_data.query_ts_code_by_code('166006')
 index_code = '000688.SH'
 # index_info = get_data.query_index_basic(index_code, '', market='SSE')
 # df_cal_data = get_data.get_index_daily_data(index_code, '20190101', '20220301')
-cal_data_tu = get_data.get_index_daily_data('000001.SH', '20220210', '20220512')
+cal_data_tu = get_data.gen_index_daily_data('000001.SH', '20220210', '20220512')
 cal_data_s = cal_data_tu[cal_data_tu['weekday'] == 5]
 # fig = plt.figure()
 # ax1 = fig.add_subplot(111)
@@ -73,7 +73,9 @@ cal_data_s = cal_data_tu[cal_data_tu['weekday'] == 5]
 # share = get_data.query_fund_share('167508.SZ')
 
 code, start, end = '001763.OF', '20211230', '20220201'
+code = '588370.SH'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
+portfolio1 = pro.fund_portfolio(ts_code='159642.SZ')
 
 fo = pd.read_csv(r'rst_out\fio_open_20211231.csv')
 fe = pd.read_csv(r'rst_out\fio_exchange_20211231.csv')
@@ -106,7 +108,7 @@ rst = save_index_ratio(period_q, index_name, save_file)
 save_file = r'rst_out\my_fund_total_01.csv'
 my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
 query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-fund_ab = save_my_fund_ab(period_q, save_file, my_fund_file, query_basic_f)
+fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 f_s = fund_ab[fund_ab['fund_type'].isin(['股票型', '混合型'])]
 f_c = f_s.drop(['ts_code', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
                 'm_fee', 'c_fee', 'manager', 'ann_date'], axis=1)
