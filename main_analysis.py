@@ -172,10 +172,7 @@ if __name__ == '__main__':
                              '20191231', '20201231', '20211231', '20221231', '20221231'],
                 'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
                                  '2020', '2021', '2022', 'all']}
-    # period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231',  '20161230'],
-    #             'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
-    #             'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
-    save_file = r'.\rst_out\index_yield_rate.csv'
+    save_file = r'.\rst_out\index_yield_rate_2023.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
@@ -184,17 +181,20 @@ if __name__ == '__main__':
     query_basic_file = r'final_data/query_db/query_fund_basic.csv'
     # save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
     save_file = r'rst_out\fund_yield_rate_bond_O_202301.csv'
-    fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200201', market='O', fund_type=query_type,
-                                   query_file=query_basic_file)
+    # fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200201', market='O', fund_type=query_type,
+    #                                query_file=query_basic_file)
 
     # period_q = {'date_start': ['20211231'],
     #             'date_end': ['20221231'],
     #             'query_period': ['2022']}
+    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231',  '20161230'],
+                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
+                'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
     save_file = r'rst_out\my_fund_2022.xlsx'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     # query_basic_f = None
-    # fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
+    fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 
     query_stock_file = r'final_data\query_db\query_stock_list.csv'
     query_fund_file = r'rst_out\my_fund_2022.csv'
