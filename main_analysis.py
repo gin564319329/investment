@@ -179,20 +179,17 @@ if __name__ == '__main__':
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
-    # query_type = ('股票型', '混合型')
-    query_type = ('股票型', '混合型', '商品型', '另类投资型')
+    query_type = ['债券型']
+    # query_type = ('股票型', '混合型', '商品型', '另类投资型')
     query_basic_file = r'final_data/query_db/query_fund_basic.csv'
-    save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
-    # save_file = r'rst_out\open_fund_yield_rate_bond_202301.csv'
-    # fund_all = save_tu_f
-    #
-    #
-    # und_append(period_q, save_file, found_date_sel='20220201', market=None, fund_type=query_type,
-    #                                query_file=query_basic_file)
+    # save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
+    save_file = r'rst_out\fund_yield_rate_bond_O_202301.csv'
+    fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200201', market='O', fund_type=query_type,
+                                   query_file=query_basic_file)
 
-    period_q = {'date_start': ['20211231'],
-                'date_end': ['20221231'],
-                'query_period': ['2022']}
+    # period_q = {'date_start': ['20211231'],
+    #             'date_end': ['20221231'],
+    #             'query_period': ['2022']}
     save_file = r'rst_out\my_fund_2022.xlsx'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
@@ -209,4 +206,4 @@ if __name__ == '__main__':
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
     fund_file = r'rst_out\exchange_fund_yield_rate_202301.csv'
-    select_good_fund(fund_file, fund_type=('股票型', '混合型'), max_net_asset=100)
+    # select_good_fund(fund_file, fund_type=('股票型', '混合型'), max_net_asset=100)
