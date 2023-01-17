@@ -1,6 +1,7 @@
 from data_generator import GenCustomData, GenFixedInvest
 from show_rst import ShowRst
 import time
+import os
 import pandas as pd
 import logging
 import basic_calculator as yc
@@ -48,7 +49,7 @@ def save_tu_fund_append(period_query, save_dir, found_date_sel='20210601', fund_
 
 def save_my_fund(period_query, save_dir, my_file, query_file=None):
     """ save my selective fund: append info - fund manager, net asset info..."""
-    my_fund = pd.read_excel(my_file, dtype={'code': str})
+    my_fund = pd.read_excel(my_file, sheet_name=0, dtype={'code': str})
     if query_file is None:
         query_info = None
     else:
@@ -134,8 +135,14 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
 
 
-def select_good_fund(yield_rate_file, fund_type=('股票型', '混合型'), max_net_asset=80):
-    fund = pd.read_csv(yield_rate_file)
+def select_good_fund(yield_rate_file, save_sel_file, fund_type=('股票型', '混合型'), max_net_asset=80):
+    if os.path.basename(yield_rate_file).endswith('csv'):
+        fund = pd.read_csv(yield_rate_file)
+    elif os.path.basename(yield_rate_file).endswith('xlsx'):
+        fund = pd.read_excel(yield_rate_file, sheet_name=0)
+    else:
+        logging.error('wrong file type!')
+        return
     fund = fund[fund['fund_type'].isin(fund_type)]
     fund1 = fund[fund['2017'].notna()]
     fund1 = fund1[fund1['net_asset'] < max_net_asset]
@@ -148,7 +155,7 @@ def select_good_fund(yield_rate_file, fund_type=('股票型', '混合型'), max_
     fund1 = fund1[fund1['2018'] >= fund['2018'].median()]
     good_fund = fund1.sort_values(by=['2022'], ascending=False)
     if good_fund.shape[0] > 0:
-        good_fund.to_csv(r'rst_out\good_fund_sel.csv', index=False, encoding='utf_8_sig')
+        good_fund.to_csv(save_sel_file, index=False, encoding='utf_8_sig')
         logging.info('eligible fund selection done!')
     else:
         logging.warning('there is no eligible fund!')
@@ -194,7 +201,7 @@ if __name__ == '__main__':
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     # query_basic_f = None
-    fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
+    # fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 
     query_stock_file = r'final_data\query_db\query_stock_list.csv'
     query_fund_file = r'rst_out\my_fund_2022.csv'
@@ -205,5 +212,7 @@ if __name__ == '__main__':
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
-    fund_file = r'rst_out\exchange_fund_yield_rate_202301.csv'
-    # select_good_fund(fund_file, fund_type=('股票型', '混合型'), max_net_asset=100)
+    # fund_file = r'rst_out\fund_yield_rate_stock_202301.csv'
+    fund_file = r'rst_out/my_fund_2022.xlsx'
+    save_file = r'rst_out\good_my_fund_sel.csv'
+    select_good_fund(fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)

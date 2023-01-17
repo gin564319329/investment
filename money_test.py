@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from data_generator import QueryTuShareData, GenCustomData
@@ -44,28 +45,35 @@ code, start, end = '001763.OF', '20211230', '20220201'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 portfolio1 = pro.fund_portfolio(ts_code='159642.SZ')
 
-fdo = pd.read_csv(r'rst_out\fund_basic_open_total_a.csv')
-fdo1 = fdo[fdo['fund_type'].isin(['股票型', '混合型'])]
-fdo2 = fdo1[fdo1['2017'].notna()]
-fdo3 = fdo2[fdo2['net_asset'] < 80]
-fdo4 = fdo2[fdo2['2021'] >= 0]
-fdo5 = fdo4[fdo4['2020'] >= fdo2['2020'].median()]
-fdo5 = fdo5[fdo5['2019'] >= fdo2['2019'].median()]
-fdo5 = fdo5[fdo5['2018'] >= fdo2['2018'].median()]
-fdo6 = fdo5.sort_values(by=['2021'], ascending=False)
-fdo7 = fdo6[fdo6['net_asset'] < 80]
-fdo7.to_csv(r'rst_out\fund_sel.csv', index=False, encoding='utf_8_sig')
 
-period_q = {'date_start': ['20211231'],
-            'date_end': ['20220219'],
-            'query_period': ['2022']}
-save_file = r'rst_out\my_fund_total_01.csv'
-my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
-query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
-f_s = fund_ab[fund_ab['fund_type'].isin(['股票型', '混合型'])]
-f_c = f_s.drop(['ts_code', 'management', 'found_date', 'fund_type', 'invest_type', 'benchmark',
-                'm_fee', 'c_fee', 'manager', 'ann_date'], axis=1)
-f_c.median()
-fsort = f_c.sort_values(by=['2022'], ascending=False)
+csv_file = r'final_data\fund_yield_rate_stock_202301.csv'
+my_file = r'rst_out/my_fund_2022.xlsx'
+save_file = r'rst_out\my_fund_sel.csv'
+base_fund = pd.read_csv(csv_file)
+fund = pd.read_excel(my_file, sheet_name=0)
+
+base_fund = base_fund[base_fund['fund_type'].isin(('股票型', '混合型'))]
+fund1 = fund[fund['fund_type'].isin(('股票型', '混合型'))]
+# fund1 = fund[fund['2017'].notna()]
+# fund1 = fund[fund['2017'].isna()]
+# fund1 = fund[fund['net_asset'] < 100]
+# fund1 = fund[fund['net_asset'] > 100]
+
+fund1 = fund1[fund1['2022'] >= base_fund['2022'].median()]
+fund1 = fund1[fund1['2021'] >= base_fund['2021'].median()]
+# fund1 = fund1[fund1['2021'] >= -5]
+fund1 = fund1[fund1['2020'] >= base_fund['2020'].median()]
+fund1 = fund1[fund1['2019'] >= base_fund['2019'].median()]
+fund1 = fund1[fund1['2018'] >= base_fund['2018'].median()]
+good_fund = fund1.sort_values(by=['2022'], ascending=False)
+
+fund1 = fund1[fund1['2022'] < base_fund['2022'].median()]
+fund1 = fund1[fund1['2021'] < base_fund['2021'].median()]
+fund1 = fund1[fund1['2020'] < base_fund['2020'].median()]
+fund1 = fund1[fund1['2019'] < base_fund['2019'].median()]
+fund1 = fund1[fund1['2018'] < base_fund['2018'].median()]
+bad_fund = fund1.sort_values(by=['2022'], ascending=True)
+
+good_fund.to_excel(save_file, index=False, encoding='utf_8_sig')
+
 
