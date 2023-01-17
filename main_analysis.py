@@ -134,6 +134,26 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
 
 
+def select_good_fund(yield_rate_file, fund_type=('股票型', '混合型'), max_net_asset=80):
+    fund = pd.read_csv(yield_rate_file)
+    fund = fund[fund['fund_type'].isin(fund_type)]
+    fund1 = fund[fund['2017'].notna()]
+    fund1 = fund1[fund1['net_asset'] < max_net_asset]
+
+    fund1 = fund1[fund1['2022'] >= fund['2022'].median()]
+    fund1 = fund1[fund1['2021'] >= fund['2021'].median()]
+    # fund1 = fund1[fund1['2021'] >= -5]
+    fund1 = fund1[fund1['2020'] >= fund['2020'].median()]
+    fund1 = fund1[fund1['2019'] >= fund['2019'].median()]
+    fund1 = fund1[fund1['2018'] >= fund['2018'].median()]
+    good_fund = fund1.sort_values(by=['2022'], ascending=False)
+    if good_fund.shape[0] > 0:
+        good_fund.to_csv(r'rst_out\good_fund_sel.csv', index=False, encoding='utf_8_sig')
+        logging.info('eligible fund selection done!')
+    else:
+        logging.warning('there is no eligible fund!')
+
+
 if __name__ == '__main__':
     save_file = r'.\rst_out\query_fund_basic.csv'
     # save_tu_fund_raw(save_file)
@@ -164,8 +184,11 @@ if __name__ == '__main__':
     query_basic_file = r'final_data/query_db/query_fund_basic.csv'
     save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
     # save_file = r'rst_out\open_fund_yield_rate_bond_202301.csv'
-    fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20220201', market=None, fund_type=query_type,
-                                   query_file=query_basic_file)
+    # fund_all = save_tu_f
+    #
+    #
+    # und_append(period_q, save_file, found_date_sel='20220201', market=None, fund_type=query_type,
+    #                                query_file=query_basic_file)
 
     period_q = {'date_start': ['20211231'],
                 'date_end': ['20221231'],
@@ -184,3 +207,6 @@ if __name__ == '__main__':
     # portfolio_t = save_fund_portfolio('20211230', '20220201', save_fio_file, market='E', found_date=20210601,
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
+
+    fund_file = r'rst_out\exchange_fund_yield_rate_202301.csv'
+    select_good_fund(fund_file, fund_type=('股票型', '混合型'), max_net_asset=100)
