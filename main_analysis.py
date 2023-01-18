@@ -135,25 +135,27 @@ def analysis_fund_fio(fio_dir, save_count, count=2):
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
 
 
-def select_good_fund(yield_rate_file, save_sel_file, fund_type=('股票型', '混合型'), max_net_asset=80):
-    if os.path.basename(yield_rate_file).endswith('csv'):
-        fund = pd.read_csv(yield_rate_file)
-    elif os.path.basename(yield_rate_file).endswith('xlsx'):
-        fund = pd.read_excel(yield_rate_file, sheet_name=0)
+def select_good_fund(query_fund, base_fund, save_sel_file, fund_type=('股票型', '混合型'), max_net_asset=80):
+    base = pd.read_csv(base_fund)
+    base = base[base['fund_type'].isin(fund_type)]
+    if os.path.basename(query_fund).endswith('csv'):
+        query = pd.read_csv(query_fund)
+    elif os.path.basename(query_fund).endswith('xlsx'):
+        query = pd.read_excel(query_fund, sheet_name=0)
     else:
         logging.error('wrong file type!')
         return
-    fund = fund[fund['fund_type'].isin(fund_type)]
-    fund1 = fund[fund['2017'].notna()]
-    fund1 = fund1[fund1['net_asset'] < max_net_asset]
+    query = query[query['fund_type'].isin(fund_type)]
+    query = query[query['2017'].notna()]
+    query = query[query['net_asset'] < max_net_asset]
 
-    fund1 = fund1[fund1['2022'] >= fund['2022'].median()]
-    fund1 = fund1[fund1['2021'] >= fund['2021'].median()]
+    query = query[query['2022'] >= base['2022'].median()]
+    query = query[query['2021'] >= base['2021'].median()]
     # fund1 = fund1[fund1['2021'] >= -5]
-    fund1 = fund1[fund1['2020'] >= fund['2020'].median()]
-    fund1 = fund1[fund1['2019'] >= fund['2019'].median()]
-    fund1 = fund1[fund1['2018'] >= fund['2018'].median()]
-    good_fund = fund1.sort_values(by=['2022'], ascending=False)
+    query = query[query['2020'] >= base['2020'].median()]
+    query = query[query['2019'] >= base['2019'].median()]
+    query = query[query['2018'] >= base['2018'].median()]
+    good_fund = query.sort_values(by=['2022'], ascending=False)
     if good_fund.shape[0] > 0:
         good_fund.to_csv(save_sel_file, index=False, encoding='utf_8_sig')
         logging.info('eligible fund selection done!')
@@ -187,8 +189,8 @@ if __name__ == '__main__':
     # query_type = ('股票型', '混合型', '商品型', '另类投资型')
     query_basic_file = r'final_data/query_db/query_fund_basic.csv'
     # save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
-    save_file = r'rst_out\fund_yield_rate_bond_O_202301.csv'
-    # fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200201', market='O', fund_type=query_type,
+    save_file = r'rst_out\fund_yield_rate_bond_202301.csv'
+    # fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200101', market=None, fund_type=query_type,
     #                                query_file=query_basic_file)
 
     # period_q = {'date_start': ['20211231'],
@@ -212,7 +214,8 @@ if __name__ == '__main__':
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
-    # fund_file = r'rst_out\fund_yield_rate_stock_202301.csv'
-    fund_file = r'rst_out/my_fund_2022.xlsx'
-    save_file = r'rst_out\good_my_fund_sel.csv'
-    select_good_fund(fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)
+    b_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
+    q_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
+    q_fund_file = r'final_data/my_fund_202301.xlsx'
+    save_file = r'rst_out\good_my_fund.csv'
+    select_good_fund(q_fund_file, b_fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)

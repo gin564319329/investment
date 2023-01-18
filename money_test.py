@@ -21,10 +21,11 @@ nav = pro.fund_nav(ts_code='450009.OF')
 sha = pro.fund_share(ts_code='161005.SZ')
 s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='20220121')  # 167508.SZ 450009.OF
 s = pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
+df = pro.cb_basic(fields="ts_code,bond_short_name,stk_code,stk_short_name,list_date,delist_date")  # 获取可转债基础信息列表
+
 
 get_data = GenCustomData()
 db = QueryTuShareData()
-
 code = get_data.query_ts_code_by_code('166006')
 code_rst = get_data.get_index_tscode_by_name(['科创50'])
 index_code = '000688.SH'
@@ -44,7 +45,6 @@ share = get_data.query_fund_share('167508.SZ')
 code, start, end = '001763.OF', '20211230', '20220201'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 portfolio1 = pro.fund_portfolio(ts_code='159642.SZ')
-
 
 csv_file = r'final_data\fund_yield_rate_stock_202301.csv'
 my_file = r'rst_out/my_fund_2022.xlsx'
@@ -75,5 +75,3 @@ fund1 = fund1[fund1['2018'] < base_fund['2018'].median()]
 bad_fund = fund1.sort_values(by=['2022'], ascending=True)
 
 good_fund.to_excel(save_file, index=False, encoding='utf_8_sig')
-
-
