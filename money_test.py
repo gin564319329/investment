@@ -42,7 +42,7 @@ stn = get_data.query_stock_name('000001.SZ')
 fund_manager = get_data.query_fund_manager('167508.SZ')
 share = get_data.query_fund_share('167508.SZ')
 
-code, start, end = '001763.OF', '20211230', '20220201'
+code, start, end = '001763.OF', '20220928', '20221130'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 portfolio1 = pro.fund_portfolio(ts_code='159642.SZ')
 

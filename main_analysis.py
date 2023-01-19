@@ -58,6 +58,7 @@ def save_my_fund(period_query, save_dir, my_file, query_file=None):
     my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
     logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
     my_fund_append.to_excel(save_dir, index=False, encoding='utf_8_sig')
+    # my_fund_append.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return my_fund_append
 
 
@@ -199,23 +200,23 @@ if __name__ == '__main__':
     period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231',  '20161230'],
                 'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
                 'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
-    save_file = r'rst_out\my_fund_2022.xlsx'
+    save_file = r'rst_out\my_fund_2023.xlsx'
+    # save_file = r'rst_out\my_fund_2023.csv'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
-    # query_basic_f = None
     # fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 
     query_stock_file = r'final_data\query_db\query_stock_list.csv'
-    query_fund_file = r'rst_out\my_fund_2022.csv'
-    # query_fund_file = r'final_data\query_db\query_fund_basic.csv'
-    save_fio_file = r'rst_out\fio_all_20211231.csv'
-    save_count_file = r'rst_out\fio_count_all_20211231.csv'
-    # portfolio_t = save_fund_portfolio('20211230', '20220201', save_fio_file, market='E', found_date=20210601,
-    #                                   query_fund=query_fund_file, query_stock=query_stock_file)
-    # analysis_fund_fio(save_fio_file, save_count_file, count=1)
+    # query_fund_file = r'rst_out\my_fund_2023.csv'
+    query_fund_file = r'final_data\query_db\query_fund_basic.csv'
+    save_fio_file = r'rst_out\fio_all_202209.csv'
+    save_count_file = r'rst_out\fio_count_all_202209.csv'
+    portfolio_t = save_fund_portfolio('20220928', '20221130', save_fio_file, market='E', found_date=20210601,
+                                      query_fund=query_fund_file, query_stock=query_stock_file)
+    analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
     b_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
     q_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
-    q_fund_file = r'final_data/my_fund_202301.xlsx'
+    # q_fund_file = r'final_data/my_fund_202301.xlsx'
     save_file = r'rst_out\good_my_fund.csv'
-    select_good_fund(q_fund_file, b_fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)
+    # select_good_fund(q_fund_file, b_fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)
