@@ -67,14 +67,18 @@ def save_fund_portfolio(start_date, end_date, save_dir, market='E', found_date=2
     portfolio_total = pd.DataFrame()
     ann_num = 0
     if not query_fund:
-        fund = get_data.query_fund_basic(market=market, fund_type=['股票型', '混合型'])
+        fund = get_data.query_fund_basic(market='E', fund_type=['股票型', '混合型'])
+        fund = fund[fund['found_date'] <= found_date]
+    elif not market:
+        fund = pd.read_csv(query_fund)
+        fund = fund[fund['fund_type'].isin(['股票型', '混合型'])][fund['found_date'] <= found_date]
     else:
         fund = pd.read_csv(query_fund)
         fund = fund[fund['fund_type'].isin(['股票型', '混合型'])][fund['market'] == market][fund['found_date'] <= found_date]
     for i, row in fund.iterrows():
         ts_code = row.get('ts_code')
         print('start query: {} {} portfolio data'.format(i, ts_code))
-        time.sleep(0.88)
+        time.sleep(0.89)
         fio = get_data.append_fund_portfolio_name(ts_code, row.get('name'), start_date, end_date, query_stock)
         if fio.empty:
             print('No {} portfolio data'.format(ts_code))
@@ -177,9 +181,9 @@ if __name__ == '__main__':
     index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
     # index_name = ['上证指数', '沪深300', '中证500']
     period_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
-                               '20181228', '20191231', '20201231', '20211231', '20111230'],
+                               '20181228', '20191231', '20201231', '20211231', '20221230', '20111230'],
                 'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-                             '20191231', '20201231', '20211231', '20221231', '20221231'],
+                             '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
                 'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
                                  '2020', '2021', '2022', 'all']}
     save_file = r'.\rst_out\index_yield_rate_2023.csv'
@@ -197,10 +201,11 @@ if __name__ == '__main__':
     # period_q = {'date_start': ['20211231'],
     #             'date_end': ['20221231'],
     #             'query_period': ['2022']}
-    period_q = {'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231',  '20161230'],
-                'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20221231'],
-                'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', 'all']}
-    save_file = r'rst_out\my_fund_2023.xlsx'
+    period_q = {
+        'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20221230', '20161230'],
+        'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
+        'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', '2023', 'all']}
+    save_file = r'rst_out\my_fund_202301.xlsx'
     # save_file = r'rst_out\my_fund_2023.csv'
     my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
@@ -209,9 +214,9 @@ if __name__ == '__main__':
     query_stock_file = r'final_data\query_db\query_stock_list.csv'
     # query_fund_file = r'rst_out\my_fund_2023.csv'
     query_fund_file = r'final_data\query_db\query_fund_basic.csv'
-    save_fio_file = r'rst_out\fio_all_202209.csv'
-    save_count_file = r'rst_out\fio_count_all_202209.csv'
-    portfolio_t = save_fund_portfolio('20220928', '20221130', save_fio_file, market='E', found_date=20210601,
+    save_fio_file = r'rst_out\fio_all_202212.csv'
+    save_count_file = r'rst_out\fio_count_all_202212.csv'
+    portfolio_t = save_fund_portfolio('20221228', '20230130', save_fio_file, market='', found_date=20220601,
                                       query_fund=query_fund_file, query_stock=query_stock_file)
     analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
