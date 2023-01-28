@@ -186,17 +186,20 @@ if __name__ == '__main__':
                              '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
                 'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
                                  '2020', '2021', '2022', 'all']}
+    period_q = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20211231'],
+                'date_end': ['20230121', '20230121', '20230121', '20230121', '20230121'],
+                'query_period': ['last 5 year', 'last 4 year', 'last 3 year', 'last 2 year', 'last 1 year']}
     save_file = r'.\rst_out\index_yield_rate_2023.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
-    query_type = ['债券型']
-    # query_type = ('股票型', '混合型', '商品型', '另类投资型')
+    # query_type = ['债券型']
+    query_type = ('股票型', '混合型')
     query_basic_file = r'final_data/query_db/query_fund_basic.csv'
-    # save_file = r'rst_out\fund_yield_rate_stock_202301.csv'
-    save_file = r'rst_out\fund_yield_rate_bond_202301.csv'
-    # fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20200101', market=None, fund_type=query_type,
-    #                                query_file=query_basic_file)
+    save_file = r'rst_out\yield_rate_stock_fund_last202301.csv'
+    # save_file = r'rst_out\fund_yield_rate_bond_202301.csv'
+    fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20190101', market=None, fund_type=query_type,
+                                   query_file=query_basic_file)
 
     # period_q = {'date_start': ['20211231'],
     #             'date_end': ['20221231'],
@@ -216,9 +219,9 @@ if __name__ == '__main__':
     query_fund_file = r'final_data\query_db\query_fund_basic.csv'
     save_fio_file = r'rst_out\fio_all_202212.csv'
     save_count_file = r'rst_out\fio_count_all_202212.csv'
-    portfolio_t = save_fund_portfolio('20221228', '20230130', save_fio_file, market='', found_date=20220601,
-                                      query_fund=query_fund_file, query_stock=query_stock_file)
-    analysis_fund_fio(save_fio_file, save_count_file, count=1)
+    # portfolio_t = save_fund_portfolio('20221228', '20230130', save_fio_file, market='', found_date=20220601,
+    #                                   query_fund=query_fund_file, query_stock=query_stock_file)
+    # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
     b_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
     q_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
