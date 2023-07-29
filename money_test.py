@@ -14,6 +14,8 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 ts.set_token('a191d192213fbcb32f37352ae88d571a7150c06f855a32aa6b1f8c16')
+ts.get_realtime_quotes('600063')
+ts.get_realtime_quotes('000001')
 pro = ts.pro_api()
 ind = pro.index_basic(ts_code='000001.SH', market='SSE')
 f = pro.fund_basic(market='O', status='L')
@@ -22,7 +24,6 @@ sha = pro.fund_share(ts_code='161005.SZ')
 s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='20220121')  # 167508.SZ 450009.OF
 s = pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
 df = pro.cb_basic(fields="ts_code,bond_short_name,stk_code,stk_short_name,list_date,delist_date")  # 获取可转债基础信息列表
-
 
 get_data = GenCustomData()
 db = QueryTuShareData()

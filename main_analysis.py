@@ -21,6 +21,13 @@ logging.basicConfig(level=logging.INFO)
 
 get_data = GenCustomData()
 
+# ToDo
+# def net_value_estimate(fund_code, start_date, end_date, end_data='20230630'):
+#     portfolio = get_data.query_fund_portfolio(fund_code, start_date=start_date, end_date=end_date)
+#     for i, row in portfolio.iterrows():
+#         if row.get('end_date') != end_data:
+#             logging.warning('wrong ann date: {}'.format(fund_code))
+
 
 def save_tu_fund_raw(save_dir):
     fund_info = get_data.gen_raw_fund_list()

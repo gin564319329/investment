@@ -3,21 +3,35 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 
-# """总收益率"""
 def cal_total_rate(principal, final_amount):
+    """
+    计算总收益率
+    :param principal: 本金
+    :param final_amount: 最终金额
+    """
     return (final_amount - principal) / principal
 
 
-# """复利"""
-def cal_compound_interest(capital, rate_single, term):
-    """capital, rate_single, term  本金100， 单利 年利率0.1，投资期数 10年"""
-    return capital * (1 + rate_single) ** term
+def cal_compound_interest(principal, rate_single, term):
+    """
+    计算复利
+    :param principal: 本金 100
+    :param rate_single: 单利 年利率 0.1
+    :param term: 投资期数 10年
+    """
+    return principal * (1 + rate_single) ** term
 
 
-# """年化收益率"""
 def cal_annual_rate_by_value(principal, final_amount, term, num_a_year):
-    """formula: principal * (1+rate_t)**term = final_amount
-    cal_annual_rate_by_value(100, 500, 120, 12)))  # 本金100， 终值500，投资120月, 按月复利，一年12月"""
+    """
+    计算年化收益率
+    formula: principal * (1+rate_t)**term = final_amount
+    :param principal: 本金 100
+    :param final_amount: 最终金额 500
+    :param term: 投资期数 120个月
+    :param num_a_year: 按月复利，一年12月
+    Examples  cal_annual_rate_by_value(100, 500, 120, 12)))
+    """
     return ((final_amount / principal) ** (1 / term) - 1) * num_a_year
 
 
@@ -26,11 +40,17 @@ def cal_annual_rate_by_rate(rate_all, term, num_a_year):
 
 
 def cal_irr_by_fixed_invest(val_arr, num_a_year):
-    """投入与收益数组val_arr 内部收益率rate_s, 年化收益率rate_annual, 每年期数 num_a_year
-    val = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, -140000] """
-    rate_s = npf.irr(val_arr)
-    rate_annual = pow((rate_s + 1), num_a_year) - 1
-    return rate_s, rate_annual
+    """定投 计算内部收益率 年化收益率
+    :param val_arr 投入与收益数组
+    :param num_a_year 每年期数
+    :return: rate_irr 内部收益率
+    :return：rate_annual 年化收益率
+    Examples
+    val_arr = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, -140000]
+    """
+    rate_irr = npf.irr(val_arr)
+    rate_annual = pow((rate_irr + 1), num_a_year) - 1
+    return rate_irr, rate_annual
 
 
 def cal_change_ratio(initial_value, final_value):
@@ -65,8 +85,8 @@ class CalTime:
 
 if __name__ == '__main__':
     print('复利终值: {}'.format(cal_compound_interest(100, 0.1, 10)))  # 本金100， 年利率10%，投资10年
-    print('年化收益率： {}'.format(cal_annual_rate_by_value(100, 300, 10, 1)))  # 本金100， 终值300，投资10年, 按年复利，一年1年
-    print('年化收益率： {}'.format(cal_annual_rate_by_value(100, 300, 120, 12)))  # 本金100， 终值300，投资120月, 按月复利，一年12月
+    print('年化收益率： {}'.format(cal_annual_rate_by_value(100, 200, 10, 1)))  # 本金100， 终值300，投资10年, 按年复利，一年1年
+    print('年化收益率： {}'.format(cal_annual_rate_by_value(100, 200, 120, 12)))  # 本金100， 终值300，投资120月, 按月复利，一年12月
     val = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, -140000]
     irr, rate_y = cal_irr_by_fixed_invest(val, 12)
     print('内部收益率: {}  年化收益率: {}'.format(irr, rate_y))

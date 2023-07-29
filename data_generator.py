@@ -15,12 +15,13 @@ class QueryTuShareData:
         self.pro = ts.pro_api()
 
     def query_index_daily(self, ts_code, start_date, end_date):
+        """查询指数日线交易信息 可以获取包括开盘价 收盘价 成交量等"""
         df = self.pro.index_daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
         df_sort = df.sort_values(by=['trade_date'], ascending=True).reset_index(drop=True)
         return df_sort
 
     def query_index_basic(self, ts_code, name, market='CSI'):
-        """获取指数列表 基础信息"""
+        """查询指数基础信息"""
         return self.pro.index_basic(ts_code=ts_code, name=name, market=market)
 
     def query_fund_basic(self, market='E', status='L', fund_type=None):
@@ -106,6 +107,7 @@ class GenCustomData(QueryTuShareData):
         self.op = dca
 
     def gen_index_daily_data(self, ts_code, date_start, date_end):
+        """获取指数日线交易收盘点位信息，并包括年月日、星期"""
         tu_data = self.query_index_daily(ts_code, date_start, date_end)
         index_for_cal = self.gen_cal_data(tu_data)
         return index_for_cal
