@@ -99,6 +99,10 @@ class QueryTuShareData:
         """根据代码查询股票名称 ts_code=''为查询所有股票列表"""
         return self.pro.stock_basic(ts_code=ts_code)
 
+    def query_stock_daily(self, ts_code, query_date):
+        """查询股票日线行情数据"""
+        return self.pro.daily(ts_code=ts_code, start_date=query_date, end_date=query_date)
+
 
 class GenCustomData(QueryTuShareData):
 
