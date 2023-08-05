@@ -194,6 +194,7 @@ if __name__ == '__main__':
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
+    """保存筛选出来的好基金"""
     b_fund_file = r'data/final_data\yield_rate_stock_fund_202301.csv'
     q_fund_file = r'data/final_data\yield_rate_stock_fund_202301.csv'
     # q_fund_file = r'final_data/my_fund_202301.xlsx'
