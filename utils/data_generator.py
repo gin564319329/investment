@@ -9,9 +9,9 @@ import pandas as pd
 import tushare as ts
 import logging
 import numpy as np
-import os
 from datetime import date, datetime
-import data_statistics as dca
+
+from utils import data_statistics
 
 
 class QueryTuShareData:
@@ -114,7 +114,7 @@ class GenCustomData(QueryTuShareData):
 
     def __init__(self):
         super(GenCustomData, self).__init__()
-        self.op = dca
+        self.op = data_statistics
 
     def gen_index_daily_data(self, ts_code, date_start, date_end):
         """获取指数日线交易收盘点位信息，并包括年月日、星期"""
@@ -197,6 +197,7 @@ class GenCustomData(QueryTuShareData):
         if fund_basic is None:
             fund_basic = self.query_fund_basic(market=market, fund_type=fund_type)
         fund_b_sel = fund_basic[fund_basic['found_date'].astype('str') < found_date_sel]
+        logging.info('select append fund number: {}'.format(fund_b_sel.shape[0]))
         fund_b_sel.reset_index(drop=True, inplace=True)
         fund_append = fund_b_sel.copy()
         for index, row in fund_b_sel.iterrows():

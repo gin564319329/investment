@@ -1,41 +1,45 @@
 """
-主程序： 调用utils各工具，生成各类自定义分析数据、投资回测、基金筛选等
+主程序： 调用utils各工具，保存生成各类自定义分析数据、已确定策略的基金筛选等
 Author  : Jiang
 """
 
-from utils.data_generator import GenCustomData, GenFixedInvest
+from utils.data_generator import GenCustomData
 from utils.show_rst import ShowRst
-from utils import data_statistics as dca, financial_calculator as yc
+from utils import data_statistics
 import time
 import os
 import pandas as pd
 import logging
 
 
-pd.set_option('display.max_columns', None)
-pd.set_option('display.unicode.ambiguous_as_wide', True)
-pd.set_option('display.unicode.east_asian_width', True)
-pd.set_option('display.width', 1)
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(level=logging.INFO,
 #                     format='%(asctime)s %(message)s',
 #                     datefmt='%d %b %Y, %H:%M',
 #                     filename=r'rst_out/run_fund.log',
 #                     filemode='a')
-
 get_data = GenCustomData()
 
 
-def save_tu_fund_raw(save_dir):
-    fund_info = get_data.gen_raw_fund_list()
-    logging.info('fund number: {}'.format(fund_info.shape[0]))
-    fund_info.to_csv(save_dir, index=False, encoding='utf_8_sig')
-    return fund_info
+def save_fund_raw(save_dir):
+    """保存当前市场所有基金 基础信息 包括开放型与封闭型"""
+    fund_total = get_data.gen_raw_fund_list()
+    logging.info('fund number: {}'.format(fund_total.shape[0]))
+    fund_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return fund_total
 
 
-def save_tu_fund_append(period_query, save_dir, found_date_sel='20210601', fund_type=('股票型', '混合型'), market=None,
-                        query_file=None):
-    """保存tushare基金 基础信息以及扩展信息， 包括 basic信息，规模信息 net_asset 基金年度收益率信息"""
+def save_stock_list(save_dir):
+    """保存当前市场所有股票 基础信息"""
+    stock_total = get_data.gen_all_stock_list()
+    logging.info('stock number: {}'.format(stock_total.shape[0]))
+    stock_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
+    return stock_total
+
+
+def save_fund_append(period_query, save_dir, found_date_sel='20210601', fund_type=('股票型', '混合型'), market=None,
+                     query_file=None):
+    """保存当前市场，按条件筛选基金的基础信息以及扩展信息，包括basic信息，规模信息 net_asset 基金年度收益率信息"""
     if query_file is None:
         fund = None
     elif market is None:
@@ -46,7 +50,7 @@ def save_tu_fund_append(period_query, save_dir, found_date_sel='20210601', fund_
         fund = fund[fund['fund_type'].isin(fund_type)][fund['market'] == market]
 
     fund_info = get_data.append_fund_basic(period_query, found_date_sel, market, fund_type, fund)
-    logging.info('fund number: {}'.format(fund_info.shape[0]))
+    logging.info('select append fund number: {}'.format(fund_info.shape[0]))
     fund_info.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return fund_info
 
@@ -60,7 +64,6 @@ def save_my_fund(period_query, save_dir, my_file, query_file=None):
         query_info = pd.read_csv(query_file)
     my_fund_basic = get_data.gen_self_fund_list(my_fund, query_basic=query_info)
     my_fund_append = get_data.append_fund_basic(period_query, fund_basic=my_fund_basic)
-    logging.info('my fund number: {}'.format(my_fund_append.shape[0]))
     my_fund_append.to_excel(save_dir, index=False, encoding='utf_8_sig')
     # my_fund_append.to_csv(save_dir, index=False, encoding='utf_8_sig')
     return my_fund_append
@@ -95,11 +98,6 @@ def save_fund_portfolio(start_date, end_date, save_dir, market='E', found_date=2
     return portfolio_total
 
 
-def save_stock_list(save_dir):
-    stock_total = get_data.gen_all_stock_list()
-    stock_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
-
-
 def save_index_ratio(date_query, name_list, save_dir):
     code_rst = get_data.get_index_tscode_by_name(name_list)
     rst_con = get_data.gen_index_yield(date_query, code_rst)
@@ -107,38 +105,8 @@ def save_index_ratio(date_query, name_list, save_dir):
     return rst_con
 
 
-def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
-    cal_data_tu = get_data.gen_index_daily_data(ts_code, date_start, date_end)
-    fix = GenFixedInvest(cal_data_tu, money_amount=500)
-    fix_m = GenFixedInvest(cal_data_tu, money_amount=2000)
-    invest_data_w = fix.gen_data_week_fixed_invest(weekday=weekday)
-    invest_data_m = fix_m.gen_data_month_fixed_invest(month_day=m_day)
-    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = dca.get_invest_profit(invest_data_w)
-    principal_m, final_amount_m, profit_m, buy_num_m, pri_average_m = dca.get_invest_profit(invest_data_m)
-    print('week: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_w, final_amount_w, profit_w,
-                                                                                  buy_num_w))
-    print(
-        'month: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_m, final_amount_m, profit_m,
-                                                                                 buy_num_m))
-    show_r = ShowRst()
-    ax = show_r.gen_one_ax()
-    show_r.show_cumulative_value(ax, cal_data_tu, invest_data_w, pri_average_w)
-
-    # cal_time = CalTime(date_start, date_end)
-    # month_num = cal_time.cal_month_num()
-    # x_ticks = cal_time.gen_ticks(month_num)
-    val_arr_w = [500] * 50
-    val_arr_w.append(-final_amount_w)
-    val_arr_m = [2000] * 12
-    val_arr_m.append(-final_amount_m)
-    rate_w = yc.cal_total_rate(principal_w, final_amount_w)
-    rate_m = yc.cal_total_rate(principal_m, final_amount_m)
-    rate_w_irr = yc.cal_irr_by_fixed_invest(val_arr_w, 50)
-    rate_m_irr = yc.cal_irr_by_fixed_invest(val_arr_m, 12)
-
-
 def analysis_fund_fio(fio_dir, save_count, count=2):
-    sco = dca.get_fund_major_stocks(fio_dir, save_count, count)
+    sco = data_statistics.get_fund_major_stocks(fio_dir, save_count, count)
     ShowRst().show_fund_major_stocks(sco.iloc[0:51])
     # ShowRst().show_fund_major_stocks(sco.iloc[51:101])
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
@@ -173,51 +141,50 @@ def select_good_fund(query_fund, base_fund, save_sel_file, fund_type=('股票型
 
 
 if __name__ == '__main__':
-    save_file = r'data/rst_out\query_fund_basic.csv'
-    # save_tu_fund_raw(save_file)
+    """保存当前市场所有基金"""
+    raw_fund = r'data/rst_out\query_fund_basic.csv'
+    # save_fund_raw(raw_fund)
 
-    save_file = r'data/rst_out\query_stock_list.csv'
-    # save_stock_list(save_file)
+    """保存当前市场所有股票"""
+    raw_stock = r'data/rst_out\query_stock_list.csv'
+    # save_stock_list(raw_stock)
 
-    code, start, end = '000300.SH', '20151231', '20171231'
-    # analysis_invest_yield(code, start, end, weekday=4, m_day=20)
-
-    index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
-    # index_name = ['上证指数', '沪深300', '中证500']
+    """保存各宽基指数年度涨跌幅"""
+    # index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
+    index_name = ['上证指数', '沪深300', '中证500']
     period_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
                                '20181228', '20191231', '20201231', '20211231', '20221230', '20111230'],
                 'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
-                             '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
-                'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019',
-                                 '2020', '2021', '2022', 'all']}
-    period_q = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20211231'],
-                'date_end': ['20230121', '20230121', '20230121', '20230121', '20230121'],
-                'query_period': ['last 5 year', 'last 4 year', 'last 3 year', 'last 2 year', 'last 1 year']}
-    save_file = r'data/rst_out\index_yield_rate_2023.csv'
-    # rst = save_index_ratio(period_q, index_name, save_file)
+                             '20191231', '20201231', '20211231', '20221231', '20231231', '20231231'],
+                'query_period': ['2012', '2013', '2014', '2015', '2016', '2017', '2018',
+                                 '2019', '2020', '2021', '2022', '2023', 'all']}
+    # period_q = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20211231'],
+    #             'date_end': ['20230121', '20230121', '20230121', '20230121', '20230121'],
+    #             'query_period': ['last 5 year', 'last 4 year', 'last 3 year', 'last 2 year', 'last 1 year']}
+    index_file = r'data/rst_out\index_yield_rate_2023.csv'
+    # rst = save_index_ratio(period_q, index_name, index_file)
 
+    """保存当前市场，按条件筛选基金的基础信息以及扩展信息（涨跌幅等）"""
     # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
     # query_type = ['债券型']
     query_type = ('股票型', '混合型')
+    found_date = '20190101'
     query_basic_file = r'data/final_data/query_db/query_fund_basic.csv'
-    save_file = r'data/rst_out\yield_rate_stock_fund_last202301.csv'
-    # save_file = r'rst_out\fund_yield_rate_bond_202301.csv'
-    fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20190101', market=None, fund_type=query_type,
-                                   query_file=query_basic_file)
+    # append_fund = r'data/rst_out\yield_rate_fond_fund_last202301.csv'
+    append_fund = r'data/rst_out\yield_rate_stock_fund_last20230804.csv'
+    # fund_all = save_fund_append(period_q, append_fund, found_date, fund_type=query_type, query_file=query_basic_file)
 
-    # period_q = {'date_start': ['20211231'],
-    #             'date_end': ['20221231'],
-    #             'query_period': ['2022']}
+    """保存我的自选基金的基础信息以及扩展信息（涨跌幅等）"""
     period_q = {
         'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20221230', '20161230'],
-        'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
+        'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20231231', '20231231'],
         'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', '2023', 'all']}
-    save_file = r'data/rst_out\my_fund_202301.xlsx'
-    # save_file = r'rst_out\my_fund_2023.csv'
+    save_file = r'data/rst_out\my_fund_202308.xlsx'
     my_fund_file = r'data/final_data\query_db\my_fund_raw.xlsx'
-    query_basic_f = r'final_data\query_db\query_fund_basic.csv'
+    query_basic_f = r'data/final_data\query_db\query_fund_basic.csv'
     # fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 
+    """保存基金持仓股票数据"""
     query_stock_file = r'data/final_data\query_db\query_stock_list.csv'
     # query_fund_file = r'rst_out\my_fund_2023.csv'
     query_fund_file = r'data/final_data\query_db\query_fund_basic.csv'
@@ -227,8 +194,8 @@ if __name__ == '__main__':
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
-    b_fund_file = r'data/final_data\fund_yield_rate_stock_202301.csv'
-    q_fund_file = r'data/final_data\fund_yield_rate_stock_202301.csv'
+    b_fund_file = r'data/final_data\yield_rate_stock_fund_202301.csv'
+    q_fund_file = r'data/final_data\yield_rate_stock_fund_202301.csv'
     # q_fund_file = r'final_data/my_fund_202301.xlsx'
     save_file = r'data/rst_out\good_my_fund.csv'
     # select_good_fund(q_fund_file, b_fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)
