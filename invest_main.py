@@ -69,6 +69,13 @@ def save_my_fund(period_query, save_dir, my_file, query_file=None):
     return my_fund_append
 
 
+def save_index_ratio(date_query, name_list, save_dir):
+    code_rst = get_data.get_index_tscode_by_name(name_list)
+    rst_con = get_data.gen_index_yield(date_query, code_rst)
+    rst_con.to_csv(save_dir, index=True, encoding='utf_8_sig')
+    return rst_con
+
+
 def save_fund_portfolio(start_date, end_date, save_dir, market='E', found_date=20210601, query_fund='', query_stock=''):
     """根据基金query_fund_basic.csv总表，循环查询append portfolio"""
     portfolio_total = pd.DataFrame()
@@ -96,13 +103,6 @@ def save_fund_portfolio(start_date, end_date, save_dir, market='E', found_date=2
     portfolio_total.to_csv(save_dir, index=False, encoding='utf_8_sig')
     print('announce fund number: {}'.format(ann_num))
     return portfolio_total
-
-
-def save_index_ratio(date_query, name_list, save_dir):
-    code_rst = get_data.get_index_tscode_by_name(name_list)
-    rst_con = get_data.gen_index_yield(date_query, code_rst)
-    rst_con.to_csv(save_dir, index=True, encoding='utf_8_sig')
-    return rst_con
 
 
 def analysis_fund_fio(fio_dir, save_count, count=2):
