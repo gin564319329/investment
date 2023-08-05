@@ -1,12 +1,16 @@
-from data_generator import GenCustomData, GenFixedInvest
-from show_rst import ShowRst
+"""
+主程序： 调用utils各工具，生成各类自定义分析数据、投资回测、基金筛选等
+Author  : Jiang
+"""
+
+from utils.data_generator import GenCustomData, GenFixedInvest
+from utils.show_rst import ShowRst
+from utils import data_statistics as dca, financial_calculator as yc
 import time
 import os
 import pandas as pd
 import logging
-import basic_calculator as yc
-import data_calculator as dca
-from basic_calculator import CalTime
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.unicode.ambiguous_as_wide', True)
@@ -109,8 +113,8 @@ def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
     fix_m = GenFixedInvest(cal_data_tu, money_amount=2000)
     invest_data_w = fix.gen_data_week_fixed_invest(weekday=weekday)
     invest_data_m = fix_m.gen_data_month_fixed_invest(month_day=m_day)
-    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = dca.cal_invest_profit(invest_data_w)
-    principal_m, final_amount_m, profit_m, buy_num_m, pri_average_m = dca.cal_invest_profit(invest_data_m)
+    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = dca.get_invest_profit(invest_data_w)
+    principal_m, final_amount_m, profit_m, buy_num_m, pri_average_m = dca.get_invest_profit(invest_data_m)
     print('week: principal: {}, final_amount: {}, profit: {}, buy_num: {}'.format(principal_w, final_amount_w, profit_w,
                                                                                   buy_num_w))
     print(
@@ -134,7 +138,7 @@ def analysis_invest_yield(ts_code, date_start, date_end, weekday=4, m_day=20):
 
 
 def analysis_fund_fio(fio_dir, save_count, count=2):
-    sco = dca.count_fund_major_stocks(fio_dir, save_count, count)
+    sco = dca.get_fund_major_stocks(fio_dir, save_count, count)
     ShowRst().show_fund_major_stocks(sco.iloc[0:51])
     # ShowRst().show_fund_major_stocks(sco.iloc[51:101])
     # ShowRst().show_fund_major_stocks(sco.iloc[101:151])
@@ -169,10 +173,10 @@ def select_good_fund(query_fund, base_fund, save_sel_file, fund_type=('股票型
 
 
 if __name__ == '__main__':
-    save_file = r'.\rst_out\query_fund_basic.csv'
+    save_file = r'data/rst_out\query_fund_basic.csv'
     # save_tu_fund_raw(save_file)
 
-    save_file = r'.\rst_out\query_stock_list.csv'
+    save_file = r'data/rst_out\query_stock_list.csv'
     # save_stock_list(save_file)
 
     code, start, end = '000300.SH', '20151231', '20171231'
@@ -189,14 +193,14 @@ if __name__ == '__main__':
     period_q = {'date_start': ['20171229', '20181228', '20191231', '20201231', '20211231'],
                 'date_end': ['20230121', '20230121', '20230121', '20230121', '20230121'],
                 'query_period': ['last 5 year', 'last 4 year', 'last 3 year', 'last 2 year', 'last 1 year']}
-    save_file = r'.\rst_out\index_yield_rate_2023.csv'
+    save_file = r'data/rst_out\index_yield_rate_2023.csv'
     # rst = save_index_ratio(period_q, index_name, save_file)
 
     # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
     # query_type = ['债券型']
     query_type = ('股票型', '混合型')
-    query_basic_file = r'final_data/query_db/query_fund_basic.csv'
-    save_file = r'rst_out\yield_rate_stock_fund_last202301.csv'
+    query_basic_file = r'data/final_data/query_db/query_fund_basic.csv'
+    save_file = r'data/rst_out\yield_rate_stock_fund_last202301.csv'
     # save_file = r'rst_out\fund_yield_rate_bond_202301.csv'
     fund_all = save_tu_fund_append(period_q, save_file, found_date_sel='20190101', market=None, fund_type=query_type,
                                    query_file=query_basic_file)
@@ -208,23 +212,23 @@ if __name__ == '__main__':
         'date_start': ['20161230', '20171229', '20181228', '20191231', '20201231', '20211231', '20221230', '20161230'],
         'date_end': ['20171231', '20181231', '20191231', '20201231', '20211231', '20221231', '20230121', '20230121'],
         'query_period': ['2017', '2018', '2019', '2020', '2021', '2022', '2023', 'all']}
-    save_file = r'rst_out\my_fund_202301.xlsx'
+    save_file = r'data/rst_out\my_fund_202301.xlsx'
     # save_file = r'rst_out\my_fund_2023.csv'
-    my_fund_file = r'final_data\query_db\my_fund_raw.xlsx'
+    my_fund_file = r'data/final_data\query_db\my_fund_raw.xlsx'
     query_basic_f = r'final_data\query_db\query_fund_basic.csv'
     # fund_ab = save_my_fund(period_q, save_file, my_fund_file, query_basic_f)
 
-    query_stock_file = r'final_data\query_db\query_stock_list.csv'
+    query_stock_file = r'data/final_data\query_db\query_stock_list.csv'
     # query_fund_file = r'rst_out\my_fund_2023.csv'
-    query_fund_file = r'final_data\query_db\query_fund_basic.csv'
-    save_fio_file = r'rst_out\fio_all_202212.csv'
-    save_count_file = r'rst_out\fio_count_all_202212.csv'
+    query_fund_file = r'data/final_data\query_db\query_fund_basic.csv'
+    save_fio_file = r'data/rst_out\fio_all_202212.csv'
+    save_count_file = r'data/rst_out\fio_count_all_202212.csv'
     # portfolio_t = save_fund_portfolio('20221228', '20230130', save_fio_file, market='', found_date=20220601,
     #                                   query_fund=query_fund_file, query_stock=query_stock_file)
     # analysis_fund_fio(save_fio_file, save_count_file, count=1)
 
-    b_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
-    q_fund_file = r'final_data\fund_yield_rate_stock_202301.csv'
+    b_fund_file = r'data/final_data\fund_yield_rate_stock_202301.csv'
+    q_fund_file = r'data/final_data\fund_yield_rate_stock_202301.csv'
     # q_fund_file = r'final_data/my_fund_202301.xlsx'
-    save_file = r'rst_out\good_my_fund.csv'
+    save_file = r'data/rst_out\good_my_fund.csv'
     # select_good_fund(q_fund_file, b_fund_file, save_file, fund_type=('股票型', '混合型'), max_net_asset=100)

@@ -1,11 +1,7 @@
-import numpy as np
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from data_generator import QueryTuShareData, GenCustomData
-from show_rst import ShowRst
+from utils.data_generator import QueryTuShareData, GenCustomData
 import tushare as ts
-from main_analysis import save_my_fund
 
 plt.rcParams['font.family'] = ['sans-serif']
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 必须
@@ -47,9 +43,9 @@ code, start, end = '001763.OF', '20220928', '20221130'
 portfolio = db.query_fund_portfolio(code, start_date=start, end_date=end)
 portfolio1 = pro.fund_portfolio(ts_code='159642.SZ')
 
-csv_file = r'final_data\fund_yield_rate_stock_202301.csv'
-my_file = r'rst_out/my_fund_2022.xlsx'
-save_file = r'rst_out\my_fund_sel.csv'
+csv_file = r'data/final_data\fund_yield_rate_stock_202301.csv'
+my_file = r'data/rst_out/my_fund_2022.xlsx'
+save_file = r'data/rst_out\my_fund_sel.csv'
 base_fund = pd.read_csv(csv_file)
 fund = pd.read_excel(my_file, sheet_name=0)
 

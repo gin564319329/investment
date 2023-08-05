@@ -1,3 +1,8 @@
+"""
+财务指标、收益率基本计算公式
+Author  : Jiang
+"""
+
 import numpy_financial as npf
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta

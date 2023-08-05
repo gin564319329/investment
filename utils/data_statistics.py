@@ -1,8 +1,13 @@
+"""
+count invest, fund and index evaluation info based on market data and financial_calculator.py
+Author  : Jiang
+"""
+
 import pandas as pd
-import basic_calculator as yc
+import financial_calculator as yc
 
 
-def cal_index_change_ratio(index_daily):
+def get_index_change_ratio(index_daily):
     if index_daily.empty:
         return None
     st = index_daily.iloc[0]['price']
@@ -11,20 +16,20 @@ def cal_index_change_ratio(index_daily):
     return c_ratio
 
 
-def cal_fixed_inv_change_ratio(invest_data):
-    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = cal_invest_profit(invest_data)
+def get_fixed_inv_change_ratio(invest_data):
+    principal_w, final_amount_w, profit_w, buy_num_w, pri_average_w = get_invest_profit(invest_data)
     i_ratio = yc.cal_change_ratio(principal_w, final_amount_w)
     return i_ratio
 
 
-def cal_fund_change_ratio(fund_nav):
+def get_fund_change_ratio(fund_nav):
     st = fund_nav.iloc[-1]['adj_nav']  # accum_nav adj_nav
     end = fund_nav.iloc[0]['adj_nav']
     c_ratio = yc.cal_change_ratio(st, end)
     return c_ratio
 
 
-def cal_invest_profit(df_invest_data):
+def get_invest_profit(df_invest_data):
     if df_invest_data.empty:
         return None, None, None, None, None
     principal = df_invest_data['money'].sum()
@@ -36,7 +41,7 @@ def cal_invest_profit(df_invest_data):
     return principal, final_amount, profit, buy_num, pri_average
 
 
-def cal_index_minmax(yield_df, key=''):
+def get_index_minmax(yield_df, key=''):
     yield_con = yield_df.copy()
     yield_con['最优{}'.format(key)] = yield_df.idxmax(axis=1).values
     yield_con['最差{}'.format(key)] = yield_df.idxmin(axis=1).values
@@ -51,7 +56,7 @@ def get_newest_net_asset(fund_nav):
     return net_asset, ann_date
 
 
-def count_fund_major_stocks(portfolio_dir, save_count='', count=2):
+def get_fund_major_stocks(portfolio_dir, save_count='', count=2):
     port_o = pd.read_csv(portfolio_dir)
     s_count = port_o['stock_name'].value_counts()
     s_c = s_count[s_count.values >= count]
@@ -65,7 +70,7 @@ def count_fund_major_stocks(portfolio_dir, save_count='', count=2):
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
-    sco = count_fund_major_stocks(portfolio_dir=r'final_data\fio_all.csv', save_count=r'rst_out\fio_count_o.csv')
+    sco = get_fund_major_stocks(portfolio_dir=r'final_data\fio_all.csv', save_count=r'rst_out\fio_count_o.csv')
     print(sco)
 
 

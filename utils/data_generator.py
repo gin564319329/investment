@@ -1,3 +1,9 @@
+"""
+Query basic market data based on tuShare API
+Generate advanced market data based on QueryTuShareData class
+Author  : Jiang
+"""
+
 import time
 import pandas as pd
 import tushare as ts
@@ -5,7 +11,7 @@ import logging
 import numpy as np
 import os
 from datetime import date, datetime
-import data_calculator as dca
+import data_statistics as dca
 
 
 class QueryTuShareData:
@@ -164,8 +170,8 @@ class GenCustomData(QueryTuShareData):
                 index_data = self.gen_index_daily_data(code, start, end)
                 fix = GenFixedInvest(index_data, money_amount=500)
                 invest_data = fix.gen_data_week_fixed_invest(weekday=4)
-                ch_ratio = self.op.cal_index_change_ratio(index_data)
-                in_ratio = self.op.cal_fixed_inv_change_ratio(invest_data)
+                ch_ratio = self.op.get_index_change_ratio(index_data)
+                in_ratio = self.op.get_fixed_inv_change_ratio(invest_data)
                 index_yield.at[per, '{}_涨幅'.format(name)] = ch_ratio
                 index_yield.at[per, '{}_定投'.format(name)] = in_ratio
                 if ch_ratio is not None and in_ratio is not None:
@@ -175,8 +181,8 @@ class GenCustomData(QueryTuShareData):
                     print('None {} {} change ratio is {}'.format(per, name, in_ratio))
         ch_df = index_yield[[a for a in index_yield.columns if '涨幅' in a]]
         in_df = index_yield[[a for a in index_yield.columns if '定投' in a]]
-        ch_df_a = self.op.cal_index_minmax(ch_df, '涨幅')
-        in_df_a = self.op.cal_index_minmax(in_df, '定投')
+        ch_df_a = self.op.get_index_minmax(ch_df, '涨幅')
+        in_df_a = self.op.get_index_minmax(in_df, '定投')
 
         return pd.concat([ch_df_a, in_df_a], axis=1)
 
@@ -215,7 +221,7 @@ class GenCustomData(QueryTuShareData):
                     fund_append.at[index, per] = np.NAN
                     print('{} {} no data'.format(per, row.get('name')))
                     continue
-                fund_append.at[index, per] = self.op.cal_fund_change_ratio(fund_nav_sel)
+                fund_append.at[index, per] = self.op.get_fund_change_ratio(fund_nav_sel)
                 print('{} {} fund yield rate: {:.2%}'.format(per, row.get('name'), fund_append.at[index, per]))
 
         return fund_append
