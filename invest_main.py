@@ -149,9 +149,10 @@ if __name__ == '__main__':
     raw_stock = r'data/rst_out\query_stock_list.csv'
     # save_stock_list(raw_stock)
 
-    """保存各宽基指数年度涨跌幅"""
-    index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指', '中证100', '科创50']
-    # index_name = ['上证指数', '沪深300', '中证500']
+    """保存各宽基/规模/策略指数年度涨跌幅"""
+    index_name = ['上证指数', '沪深300', '中证500', '上证50', '中证1000', '国证2000', '创业板指',
+                  '科创50', '深证成指', '中小创新']
+    # index_name = ['上证指数', '沪深300', '中证500'] '红利指数' '中证100'
     period_q = {'date_start': ['20111230', '20121231', '20131231', '20141231', '20151231', '20161230', '20171229',
                                '20181228', '20191231', '20201231', '20211231', '20221230', '20111230'],
                 'date_end': ['20121231', '20131231', '20141231', '20151231', '20161231', '20171231', '20181231',
@@ -162,16 +163,16 @@ if __name__ == '__main__':
     #             'date_end': ['20230121', '20230121', '20230121', '20230121', '20230121'],
     #             'query_period': ['last 5 year', 'last 4 year', 'last 3 year', 'last 2 year', 'last 1 year']}
     index_file = r'data/rst_out\index_yield_rate_20231231.csv'
-    rst = save_index_ratio(period_q, index_name, index_file)
+    # rst = save_index_ratio(period_q, index_name, index_file)
 
     """保存当前市场，按条件筛选基金的基础信息以及扩展信息（涨跌幅等）"""
-    # query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
-    # query_type = ['债券型']
-    query_type = ('股票型', '混合型')
+    query_type = ('股票型', '混合型', '债券型', '货币市场型', '商品型', '另类投资型')
+    query_type = ['商品型', '另类投资型', 'REITs']
+    # query_type = ('股票型', '混合型')
     found_date = '20230101'
     query_basic_file = r'data/final_data/query_db/query_fund_basic.csv'
-    # append_fund = r'data/rst_out\yield_rate_fond_fund_last202301.csv'
-    append_fund = r'data/rst_out\yield_rate_stock_fund_last20231231.csv'
+    append_fund = r'data/rst_out\yield_rate_other_fund_last20231231.csv'
+    # append_fund = r'data/rst_out\yield_rate_stock_fund_last20231231.csv'
     fund_all = save_fund_append(period_q, append_fund, found_date, fund_type=query_type, market='E', query_file=query_basic_file)
 
     """保存我的自选基金的基础信息以及扩展信息（涨跌幅等）"""
