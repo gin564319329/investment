@@ -20,7 +20,15 @@ nav = pro.fund_nav(ts_code='450009.OF')
 sha = pro.fund_share(ts_code='161005.SZ')
 s = pro.fund_portfolio(ts_code='167508.SZ', start_date='20211230', end_date='20220121')  # 167508.SZ 450009.OF
 s = pro.stock_basic(ts_code='000002.SZ, 000001.SZ')
-df = pro.cb_basic(fields="ts_code,bond_short_name,stk_code,stk_short_name,list_date,delist_date")  # 获取可转债基础信息列表
+df = pro.cb_basic(fields="ts_code, bond_short_name, stk_code, stk_short_name,issue_size,remain_size,"
+                         "value_date,maturity_date,coupon_rate,add_rate,list_date,delist_date,"
+                         "conv_stop_date,first_conv_price,conv_price")  # 获取可转债基础信息列表
+df = pro.cb_basic()
+save_file = r'data/rst_out/cb_basic.xlsx'
+df.to_excel(save_file, index=False, encoding='utf_8_sig')
+
+df = pro.cb_daily(trade_date='20240103')
+df = pro.cb_share(ts_code="113001.SH,110027.SH",fields="ts_code,end_date,convert_price,convert_val,convert_ratio,acc_convert_ratio")
 
 get_data = GenCustomData()
 db = QueryTuShareData()
