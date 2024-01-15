@@ -24,8 +24,8 @@ df = pro.cb_basic(fields="ts_code, bond_short_name, stk_code, stk_short_name,iss
                          "value_date,maturity_date,coupon_rate,add_rate,list_date,delist_date,"
                          "conv_stop_date,first_conv_price,conv_price")  # 获取可转债基础信息列表
 df = pro.cb_basic()
-save_file = r'data/rst_out/cb_basic.xlsx'
-df.to_excel(save_file, index=False, encoding='utf_8_sig')
+save_file = r'data/rst_out/cb_basic.csv'
+df.to_csv(save_file, index=False, encoding='utf_8_sig')
 
 df = pro.cb_daily(trade_date='20240103')
 df = pro.cb_share(ts_code="113001.SH,110027.SH",fields="ts_code,end_date,convert_price,convert_val,convert_ratio,acc_convert_ratio")
