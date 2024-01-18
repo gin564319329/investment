@@ -109,6 +109,19 @@ class QueryTuShareData:
         """查询股票日线行情数据"""
         return self.pro.daily(ts_code=ts_code, start_date=query_date, end_date=query_date)
 
+    def query_cb_basic(self):
+        """查询可转债convertible_bonds基本信息列表"""
+        return self.pro.cb_basic(fields="ts_code, bond_short_name, stk_code, stk_short_name,issue_size,remain_size,"
+                                        "value_date,maturity_date,coupon_rate,add_rate,list_date,delist_date,"
+                                        "conv_stop_date,first_conv_price,conv_price")
+
+    def query_cb_daily(self, ts_code='', query_date=''):
+        """查询可转债日线行情数据"""
+        return self.pro.cb_daily(ts_code=ts_code,
+                                 trade_date=query_date,
+                                 fields="ts_code,trade_date,pre_close,open,high,low,close,pct_chg,amount,bond_value,"
+                                        "bond_over_rate,cb_value,cb_over_rate")
+
 
 class GenCustomData(QueryTuShareData):
 
@@ -289,6 +302,31 @@ class GenCustomData(QueryTuShareData):
         stock_total = stock_total.drop(['symbol'], axis=1)
         return stock_total
 
+    def gen_list_cb(self):
+        """generate 未退市的可转债"""
+        cb_all = self.query_cb_basic()
+        cb_all.dropna(axis=0, how='all', inplace=True, subset=['list_date'])
+        cb_list = cb_all[cb_all['delist_date'].isnull()]
+        cb_list = cb_list[cb_list['remain_size'] > 0]
+        return cb_list
+
+    def gen_delist_cb(self):
+        """generate 已退市的可转债 包含已公布退市日期，即即将退市的可转债"""
+        cb_all = self.query_cb_basic()
+        cb_delist = cb_all.dropna(axis=0, how='any', inplace=False, subset=['list_date', 'delist_date'])
+        return cb_delist
+
+    def append_cb_basic(self, today):
+        """在原有可转债基础列表的基础上，合并当日价格查询"""
+        cb_daily = self.query_cb_daily(query_date=today)
+        cb_basic = self.query_cb_basic()
+        cb_daily_i = cb_daily.set_index(["ts_code"], inplace=False)
+        cb_basic_i = cb_basic.set_index(["ts_code"], inplace=False)
+        cb_basic_i = cb_basic_i.loc[cb_daily_i.index]
+        cb_concat = pd.concat([cb_basic_i, cb_daily_i], axis=1)
+        cb_concat = cb_concat.reset_index()
+        return cb_concat
+
 
 class GenFixedInvest:
 
@@ -348,4 +386,3 @@ if __name__ == '__main__':
     # portfolio_raw = r'rst_out\fio_exchange.csv'
     # port_e = cus_data.append_portfolio_offline(portfolio_raw, fund_b)
     # port_e.to_csv(r'rst_out\fio_append_f2.csv', index=False, encoding='utf_8_sig')
-
