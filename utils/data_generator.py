@@ -105,9 +105,9 @@ class QueryTuShareData:
         """根据代码查询股票名称 ts_code=''为查询所有股票列表"""
         return self.pro.stock_basic(ts_code=ts_code)
 
-    def query_stock_daily(self, ts_code, query_date):
+    def query_stock_daily(self, ts_code='', query_date='', fields=''):
         """查询股票日线行情数据"""
-        return self.pro.daily(ts_code=ts_code, start_date=query_date, end_date=query_date)
+        return self.pro.daily(ts_code=ts_code, start_date=query_date, end_date=query_date, fields=fields)
 
     def query_cb_basic(self):
         """查询可转债convertible_bonds基本信息列表"""
@@ -325,6 +325,15 @@ class GenCustomData(QueryTuShareData):
         cb_basic_i = cb_basic_i.loc[cb_daily_i.index]
         cb_concat = pd.concat([cb_basic_i, cb_daily_i], axis=1)
         cb_concat = cb_concat.reset_index()
+
+        stock_daily = self.query_stock_daily(query_date=today, fields="ts_code, close")
+        stock_daily = stock_daily.rename(columns={'ts_code':'stk_code', 'close':'stk_close'})
+        stock_daily_i = stock_daily.set_index(['stk_code'])
+        cb_concat_i = cb_concat.set_index(['stk_code'])
+        stock_daily_i = stock_daily_i.loc[cb_concat_i.index]
+        cb_concat = pd.concat([cb_concat_i, stock_daily_i], axis=1)
+        cb_concat = cb_concat.reset_index()
+
         return cb_concat
 
 

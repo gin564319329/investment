@@ -34,6 +34,7 @@ dy = pro.cb_daily(trade_date='20240117',
 df = pro.cb_share(ts_code="113001.SH,110027.SH",
                   fields="ts_code,end_date,convert_price,convert_val,convert_ratio,acc_convert_ratio")
 
+s = pro.daily(ts_code='', start_date='', end_date='', fields="ts_code, close")
 get_data = GenCustomData()
 db = QueryTuShareData()
 code = get_data.query_ts_code_by_code('166006')
