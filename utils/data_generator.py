@@ -316,7 +316,7 @@ class GenCustomData(QueryTuShareData):
         cb_delist = cb_all.dropna(axis=0, how='any', inplace=False, subset=['list_date', 'delist_date'])
         return cb_delist
 
-    def append_cb_basic(self, today):
+    def append_cb_basic(self, today='20240118'):
         """在原有可转债基础列表的基础上，合并当日价格查询"""
         cb_daily = self.query_cb_daily(query_date=today)
         cb_basic = self.query_cb_basic()
@@ -327,13 +327,18 @@ class GenCustomData(QueryTuShareData):
         cb_concat = cb_concat.reset_index()
 
         stock_daily = self.query_stock_daily(query_date=today, fields="ts_code, close")
-        stock_daily = stock_daily.rename(columns={'ts_code':'stk_code', 'close':'stk_close'})
+        stock_daily = stock_daily.rename(columns={'ts_code': 'stk_code', 'close': 'stk_close'})
         stock_daily_i = stock_daily.set_index(['stk_code'])
         cb_concat_i = cb_concat.set_index(['stk_code'])
         stock_daily_i = stock_daily_i.loc[cb_concat_i.index]
         cb_concat = pd.concat([cb_concat_i, stock_daily_i], axis=1)
         cb_concat = cb_concat.reset_index()
 
+        cb_value, cb_over_rate, double_low = self.op.get_cb_convert_ratio(cb_concat)
+        cb_concat['gin_cb_value'] = cb_value
+        cb_concat['gin_over_rate'] = cb_over_rate
+        cb_concat['double_low'] = double_low
+        # cb_concat.sort_values(by=['double_low'], ascending=True)
         return cb_concat
 
 
@@ -385,6 +390,7 @@ class GenFixedInvest:
 
 if __name__ == '__main__':
     cus_data = GenCustomData()
+    cb_concat1 = cus_data.append_cb_basic('20240118')
     # index_data = cus_data.get_index_daily_data('000001.SH', '20201231', '20211231')
     # ch_r = cus_data.op.cal_index_change_ratio(index_data)
     # in_r = cus_data.op.cal_fixed_inv_change_ratio(index_data)

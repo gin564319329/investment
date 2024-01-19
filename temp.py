@@ -28,7 +28,7 @@ save_file = r'data/rst_out/cb_basic.csv'
 df.to_csv(save_file, index=False, encoding='utf_8_sig')
 
 df = pro.cb_daily(ts_code='128034.SZ', trade_date='', fields="ts_code, trade_date, close, bond_value")
-dy = pro.cb_daily(trade_date='20240117',
+dy = pro.cb_daily(trade_date='20240119',
                   fields="ts_code,trade_date,pre_close,open,high,low,close,pct_chg,amount,bond_value,"
                          "bond_over_rate,cb_value,cb_over_rate")
 df = pro.cb_share(ts_code="113001.SH,110027.SH",

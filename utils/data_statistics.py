@@ -67,6 +67,15 @@ def get_fund_major_stocks(portfolio_dir, save_count, count=2):
     return s_c_df
 
 
+def get_cb_convert_ratio(cb_concat_data):
+    """计算可转债转股溢价率 双低值等"""
+    """转股溢价率＝转债价格／转股价值 - 1 ；     转股价值＝100 * 正股价／转股价"""
+    cb_value = 100 * cb_concat_data['stk_close'] / cb_concat_data['conv_price']
+    cb_over_rate = (cb_concat_data['close'] / cb_value - 1) * 100  # 按百分号里的值计算
+    double_low = cb_concat_data['close'] + cb_over_rate
+    return cb_value, cb_over_rate, double_low
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
